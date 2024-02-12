@@ -1,0 +1,42 @@
+html, body {
+    font-family: "ヒラギノ角ゴ-Pro",'Noto Sans JP';
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.4em;
+}
+.title {
+    background: #cccccc;
+    border-radius: 10px;
+    text-align: center;
+    padding: 10px 0;
+    margin: 10px 5vw;
+    font-size: 2rem;
+}
+.backhome {
+    margin-bottom: 0.5em;
+    font-size: 1.2rem;
+    display: block;
+    color: #4040ff;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+.date {
+    margin-top: 0.5em;
+    text-align: right;
+    margin-right: 5vw;
+}
+.backhome:hover {
+    text-decoration: underline;
+}
+.content {
+    margin-left: 1em;
+}
+.content img {
+    display: block;
+    max-width: 90%;
+    max-height: 40vh;
+}
+.material-symbols-rounded {
+    transform: translateY(6%);
+}
