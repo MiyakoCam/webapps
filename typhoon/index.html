@@ -248,12 +248,40 @@
                 background: #ffffff;
                 color: black;
             }
+
+            #noinfo {
+                font-family: "ヒラギノ角ゴ-Pro",'Noto Sans JP';
+                font-weight: 500;
+                color: white;
+                font-size: 2rem;
+                background-color: #000000aa;
+                z-index: 10000;
+                width: 70%;
+                height: 50%;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                display: none;
+            }
+            #noinfo span {
+                text-align: center;
+                width: 90%;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+            #noinfo.display {
+                display: block;
+            }
         </style>
     </head>
     <body>
         <div id="map"></div>
         <div id="info">
         </div>
+        <div id="noinfo"><span>現在、台風情報はありません。</span></div>
         <div class="btns">
             <select id="typhoonlist" style="width: 25em;height: calc(2em + 5px);"><option>台風情報の取得中…</option></select>
             <button id="whiledisplay_open">常時表示</button>
@@ -407,6 +435,13 @@
                 $.getJSON("https://www.jma.go.jp/bosai/typhoon/data/targetTc.json")
                 // $.getJSON("source/targetTc.json")
                 ).done(function (typhoonList) {
+                    if (typhoonList == "") {
+                        document.getElementById('noinfo').classList.add('display');
+                        return;
+                    } else {
+                        document.getElementById('noinfo').classList.add('display');
+                        document.getElementById('noinfo').classList.remove('display');
+                    }
                     while (list.lastChild) {
                         list.removeChild(list.lastChild);
                     }
