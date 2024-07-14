@@ -111,6 +111,7 @@ L.Map.SmoothWheelZoom = L.Handler.extend({
 function getName(x) {
     return x == 'temp' ? '現在の気温' :
            x == 'humidity' ? '現在の湿度' :
+           x == 'wind' ? '現在の風向風速' :
            x == 'snow' ? '現在の積雪深' :
            x == 'snow1h' ? '1時間降雪量' :
            x == 'snow3h' ? '3時間降雪量' :
@@ -129,6 +130,7 @@ function getName(x) {
 function getModeName(x) {
     return x == 'temp' ? '気温' :
            x == 'humidity' ? '湿度' :
+           x == 'wind' ? '風速' :
            x == 'snow' ? '積雪深' :
            x == 'snow1h' ? '1時間降雪量' :
            x == 'snow3h' ? '3時間降雪量' :
@@ -148,6 +150,7 @@ function getModeName(x) {
 function getHanreiNumber(x) {
     return x == 'temp' ? [35, 30, 25, 20 ,15, 10, 5, 0, -5, -10 ,-15] :
            x == 'humidity' ? [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0] :
+           x == 'wind' ? [40, 20, 15, 10, 5, 2, 1.5, 1, 0.5, 0.2, 0] :
            x == 'snow' ? [300, 250, 200, 150, 100, 75, 50 ,20, 10, 5, 0] :
            x == 'snow1h' ? [40, 30, 20, 15, 10, 5, 3, 2, 1, 0.1, 0] :
            x == 'snow3h' ? [100, 80, 60, 40, 30, 20, 10, 5, 2, 0.1, 0] :
@@ -167,6 +170,7 @@ function getHanreiNumber(x) {
 function getUnit(x) {
     return x == 'temp' ? '℃' :
            x == 'humidity' ? '%' :
+           x == 'wind' ? 'm/s' :
            x == 'snow' ? 'cm' :
            x == 'snow1h' ? 'cm' :
            x == 'snow3h' ? 'cm' :
@@ -187,7 +191,7 @@ function getColor_temp(d) {
     return d >= 35 ? '#CC00FF' :
             d >= 30  ? '#FF0000' :
             d >= 25  ? '#FF8800' :
-            d >= 20  ? '#D9E100' :
+            d >= 20  ? '#dddd00' :
             d >= 15   ? '#44dd00' :
             d >= 10   ? '#007700' :
             d >= 5   ? '#00aadd' :
@@ -202,7 +206,7 @@ function getColor_humidity(d) {
             d >= 90 ? '#CC00FF' :
             d >= 80  ? '#FF0000' :
             d >= 70  ? '#FF8800' :
-            d >= 60  ? '#D9E100' :
+            d >= 60  ? '#dddd00' :
             d >= 50   ? '#44dd00' :
             d >= 40   ? '#007700' :
             d >= 30   ? '#00aadd' :
@@ -212,11 +216,24 @@ function getColor_humidity(d) {
             d >= -15   ? '#000000' :
                         '#00000000';
 }
+function getColor_wind(d) {
+    return d >= 40 ? '#CC00FF' :
+            d >= 20  ? '#FF0000' :
+            d >= 15  ? '#FF8800' :
+            d >= 10  ? '#dddd00' :
+            d >= 5   ? '#44dd00' :
+            d >= 2   ? '#007700' :
+            d >= 1.5   ? '#00aadd' :
+            d >= 1   ? '#002AFF' :
+            d >= 0.5  ? '#002080' :
+            d >= 0.2   ? '#838383' :
+                        '#00000000';
+}
 function getColor_snow(d) {
     return d >= 300 ? '#CC00FF' :
             d >= 250  ? '#FF0000' :
             d >= 200  ? '#FF8800' :
-            d >= 150  ? '#D9E100' :
+            d >= 150  ? '#dddd00' :
             d >= 100   ? '#44dd00' :
             d >= 75   ? '#007700' :
             d >= 50   ? '#00aadd' :
@@ -231,7 +248,7 @@ function getColor_pressure(d) {
     return d >= 1030 ? '#CC00FF' :
             d >= 1025 ? '#FF0000' :
             d >= 1020  ? '#FF8800' :
-            d >= 1015  ? '#D9E100' :
+            d >= 1015  ? '#dddd00' :
             d >= 1010  ? '#44dd00' :
             d >= 1005   ? '#007700' :
             d >= 1000   ? '#00aadd' :
@@ -246,7 +263,7 @@ function getColor_normalPressure(d) {
     return d >= 1020 ? '#CC00FF' :
             d >= 1015 ? '#FF0000' :
             d >= 1012  ? '#FF8800' :
-            d >= 1010  ? '#D9E100' :
+            d >= 1010  ? '#dddd00' :
             d >= 1008  ? '#44dd00' :
             d >= 1006   ? '#007700' :
             d >= 1004   ? '#00aadd' :
@@ -262,7 +279,7 @@ function getColor_sun10m(d) {
             d >= 9 ? '#CC00FF' :
             d >= 8  ? '#FF0000' :
             d >= 7  ? '#FF8800' :
-            d >= 6  ? '#D9E100' :
+            d >= 6  ? '#dddd00' :
             d >= 5   ? '#44dd00' :
             d >= 4   ? '#007700' :
             d >= 3   ? '#00aadd' :
@@ -277,7 +294,7 @@ function getColor_sun1h(d) {
             d >= 53 ? '#CC00FF' :
             d >= 47  ? '#FF0000' :
             d >= 41  ? '#FF8800' :
-            d >= 35  ? '#D9E100' :
+            d >= 35  ? '#dddd00' :
             d >= 29   ? '#44dd00' :
             d >= 23   ? '#007700' :
             d >= 17   ? '#00aadd' :
@@ -291,7 +308,7 @@ function getColor_precipitation10m(d) {
     return d >= 40 ? '#CC00FF' :
             d >= 30  ? '#FF0000' :
             d >= 20  ? '#FF8800' :
-            d >= 15  ? '#D9E100' :
+            d >= 15  ? '#dddd00' :
             d >= 10   ? '#44dd00' :
             d >= 5   ? '#007700' :
             d >= 3   ? '#00aadd' :
@@ -305,7 +322,7 @@ function getColor_precipitation1h(d) {
     return d >= 100 ? '#CC00FF' :
             d >= 80  ? '#FF0000' :
             d >= 60  ? '#FF8800' :
-            d >= 40  ? '#D9E100' :
+            d >= 40  ? '#dddd00' :
             d >= 30   ? '#44dd00' :
             d >= 20   ? '#007700' :
             d >= 10   ? '#00aadd' :
@@ -319,7 +336,7 @@ function getColor_precipitation3h(d) {
     return d >= 200 ? '#CC00FF' :
             d >= 150  ? '#FF0000' :
             d >= 100  ? '#FF8800' :
-            d >= 60  ? '#D9E100' :
+            d >= 60  ? '#dddd00' :
             d >= 30   ? '#44dd00' :
             d >= 20   ? '#007700' :
             d >= 10   ? '#00aadd' :
@@ -333,7 +350,7 @@ function getColor_precipitation24h(d) {
     return d >= 400 ? '#CC00FF' :
             d >= 300  ? '#FF0000' :
             d >= 200  ? '#FF8800' :
-            d >= 100  ? '#D9E100' :
+            d >= 100  ? '#dddd00' :
             d >= 50   ? '#44dd00' :
             d >= 30   ? '#007700' :
             d >= 10   ? '#00aadd' :
@@ -348,7 +365,7 @@ function getColor_snow1h(d) {
     return d >= 40 ? '#CC00FF' :
             d >= 30  ? '#FF0000' :
             d >= 20  ? '#FF8800' :
-            d >= 15  ? '#D9E100' :
+            d >= 15  ? '#dddd00' :
             d >= 10   ? '#44dd00' :
             d >= 5   ? '#007700' :
             d >= 3   ? '#00aadd' :
@@ -362,7 +379,7 @@ function getColor_snow3h(d) {
     return d >= 100 ? '#CC00FF' :
             d >= 80  ? '#FF0000' :
             d >= 60  ? '#FF8800' :
-            d >= 40  ? '#D9E100' :
+            d >= 40  ? '#dddd00' :
             d >= 30   ? '#44dd00' :
             d >= 20   ? '#007700' :
             d >= 10   ? '#00aadd' :
@@ -376,7 +393,7 @@ function getColor_snow12h(d) {
     return d >= 200 ? '#CC00FF' :
             d >= 150  ? '#FF0000' :
             d >= 100  ? '#FF8800' :
-            d >= 60  ? '#D9E100' :
+            d >= 60  ? '#dddd00' :
             d >= 30   ? '#44dd00' :
             d >= 20   ? '#007700' :
             d >= 10   ? '#00aadd' :
@@ -390,7 +407,7 @@ function getColor_snow24h(d) {
     return d >= 400 ? '#CC00FF' :
             d >= 300  ? '#FF0000' :
             d >= 200  ? '#FF8800' :
-            d >= 100  ? '#D9E100' :
+            d >= 100  ? '#dddd00' :
             d >= 50   ? '#44dd00' :
             d >= 30   ? '#007700' :
             d >= 10   ? '#00aadd' :
@@ -400,6 +417,20 @@ function getColor_snow24h(d) {
             d >= -15   ? '#83838300' :
                         '#00000000';
 }
+function getNum_wind(d) {
+    return d >= 40 ? '10' :
+            d >= 20  ? '9' :
+            d >= 15  ? '8' :
+            d >= 10  ? '7' :
+            d >= 5   ? '6' :
+            d >= 2   ? '5' :
+            d >= 1.5   ? '4' :
+            d >= 1   ? '3' :
+            d >= 0.5  ? '2' :
+            d >= 0.2   ? '1' :
+                        '0';
+}
+var windDirection = {0:"静穏",1:"北北東",2:"北東",3:"東北東",4:"東",5:"東南東",6:"南東",7:"南南東",8:"南",9:"南南西",10:"南西",11:"西南西",12:"西",13:"西北西",14:"北西",15:"北北西",16:"北"};
 
 L.Map.addInitHook('addHandler', 'smoothWheelZoom', L.Map.SmoothWheelZoom );
 
@@ -410,7 +441,8 @@ var map = L.map('map', {
     minZoom: 4,
     scrollWheelZoom: false,
     smoothWheelZoom: true,
-    smoothSensitivity: 1
+    smoothSensitivity: 1.5,
+    preferCanvas:true,
 });
 //L.control.scale({maxWidth:150,position:'bottomright',imperial:false}).addTo(map);  // スケールを表示
 map.zoomControl.setPosition('topright');
@@ -432,7 +464,8 @@ var mapdata;
                     "opacity": 1,
                     "fillColor": "#ffffff",
                     "fillOpacity": 1,
-                    }
+                    },
+    attribution: "<a href='https://www.jma.go.jp/' target='_blank'>気象庁</a>"
                 }).addTo(map);
                 let border_2; //市区町界        
                 border_2 = L.geoJson(mapdata,{
@@ -459,6 +492,16 @@ Cookies.remove('latesttemp');
 var amedas = L.layerGroup();
 var nowcast = L.layerGroup();
 
+let params = new URL(window.location.href).searchParams;
+var consoletext = "自動更新は無効です。自動更新するにはURLに「?autoreload=on」を付け加えます。";
+if (params.get('autoreload') == "on") {
+    setInterval(() => {
+        TempInfo_get();
+    }, 300000);
+    consoletext = "自動更新は有効です。";
+}
+console.log(consoletext);
+
 async function PointList_get() {
     const url = "amedastable.json";
     const response = await fetch(url)
@@ -476,6 +519,7 @@ var graphDate
 function TempInfo_get() {
     already = false;
     $.get("https://www.jma.go.jp/bosai/amedas/data/latest_time.txt", function(data){
+    // $.get("latest.txt", function(data){
         latestTime = data;
         nowcastDate = new Date(data.substring(0,19));
         graphDate = new Date(data.substring(0,19));
@@ -507,9 +551,6 @@ PointList_get();
 var unit;
 var nowcast_basemap;
 
-// setInterval(() => {
-//     TempInfo_get();
-// }, 120000);
 
 function mapDraw(param_mapDraw, redrawNowcast) {
     document.getElementById('title_text').innerText = getName(param_mapDraw);
@@ -530,7 +571,7 @@ function mapDraw(param_mapDraw, redrawNowcast) {
 
         let nowcast_url = "https://www.jma.go.jp/bosai/jmatile/data/nowc/"+nowcastGetTime+"/none/"+nowcastGetTime+"/surf/hrpns/{z}/{x}/{y}.png"
 
-        nowcast_basemap = L.tileLayer(nowcast_url, {opacity: 0.5,pane:"nowcast",attribution: "<a href='https://www.jma.go.jp/bosai/nowc' target='_blank'>気象庁</a>"})
+        nowcast_basemap = L.tileLayer(nowcast_url, {opacity: 0.5,pane:"nowcast"})
         if (document.getElementById('amagumo_settings_range_span').innerText != "0.50") {
             let opacity = document.getElementById('amagumo_settings_range_span').innerText;
             nowcast_basemap["options"]["opacity"] = opacity;
@@ -592,6 +633,7 @@ function mapDraw(param_mapDraw, redrawNowcast) {
         document.getElementById('hanrei_td11').style.display = "none";
         document.getElementById('hanrei_td12').style.display = "none";
     }
+    document.getElementById('hanrei_td0_1').innerText = getUnit(param_mapDraw);
 
     Object.entries(PointList).forEach(element => {
         
@@ -602,8 +644,15 @@ function mapDraw(param_mapDraw, redrawNowcast) {
                     if (param_mapDraw == "sun1h" && already == false) {tempJson[element[0]][param_mapDraw][0] = tempJson[element[0]][param_mapDraw][0] * 60;}
                     if (param_mapDraw == "temp" || param_mapDraw == "pressure" || param_mapDraw == "normalPressure") {tempJson[element[0]][param_mapDraw][0] = Number(tempJson[element[0]][param_mapDraw][0]).toFixed(1);}
                     var amedas_latlng = new L.LatLng((element[1]["lat"][0] + element[1]["lat"][1]/60) , (element[1]["lon"][0] + element[1]["lon"][1]/60));
-                    eval("circle"+element[0]+" = L.circle(amedas_latlng, {pane: \"amedas\", radius:6000, weight: 3,opacity:1,popupAnchor: [0,-50],fillColor: getColor_"+param_mapDraw+"(tempJson[element[0]][param_mapDraw][0]),fillOpacity:0.3,color:getColor_"+param_mapDraw+"(tempJson[element[0]][param_mapDraw][0])});");
-                    eval("circle"+element[0]+".bindTooltip('<ruby>'+element[1]['kjName'] + '<rt>' + element[1]['knName'] + '</rt></ruby>　'+tempJson[element[0]][param_mapDraw][0]+unit,{direction: 'auto', permanent: false, sticky: false,});");
+                    if (param_mapDraw != "wind") {
+                        eval("circle"+element[0]+" = L.circle(amedas_latlng, {pane: \"amedas\", radius:6000, weight: 3,opacity:1,popupAnchor: [0,-50],fillColor: getColor_"+param_mapDraw+"(tempJson[element[0]][param_mapDraw][0]),fillOpacity:0.3,color:getColor_"+param_mapDraw+"(tempJson[element[0]][param_mapDraw][0])});");
+                        eval("circle"+element[0]+".bindTooltip('<ruby>'+element[1]['kjName'] + '<rt>' + element[1]['knName'] + '</rt></ruby>　'+tempJson[element[0]][param_mapDraw][0]+unit,{direction: 'auto', permanent: false, sticky: false,});");
+                    } else {
+                        var icon = L.icon({iconUrl: 'source/wind'+getNum_wind(tempJson[element[0]][param_mapDraw][0])+'.png',iconSize: [30, 30], iconAnchor: [15, 15]});
+                        eval("circle"+element[0]+" = L.marker(amedas_latlng, {pane: \"amedas\", icon: icon, rotationAngle: tempJson[element[0]]['windDirection'][0] * 22.5});");
+                        eval("circle"+element[0]+".bindTooltip('<ruby>'+element[1]['kjName'] + '<rt>' + element[1]['knName'] + '</rt></ruby> '+windDirection[tempJson[element[0]]['windDirection'][0]]+' '+tempJson[element[0]][param_mapDraw][0]+unit,{direction: 'auto', permanent: false, sticky: false,});");
+                    }
+                    
                     eval("circle"+element[0]+".on('click', function(e) { createGraph("+element[0]+", e);})");
                     eval("circle"+element[0]+".kjName = element[1]['kjName']");
                     eval("circle"+element[0]+".knName = element[1]['knName']");
@@ -792,14 +841,15 @@ function createGraph(stationID, e) {
         AllDataContinue(true, true);
     });
     
-    var year = graphDate.getFullYear();
-    var month = ('0' + (graphDate.getMonth() + 1)).slice(-2);
-    var date = ('0' + graphDate.getDate()).slice(-2);
-    var hour = ('0' + graphDate.getHours()).slice(-2);
-    var minute = ('0' + graphDate.getMinutes()).slice(-2);
-    getTodayData(stationID, year, month, date, hour, minute);
+    var Toyear = graphDate.getFullYear();
+    var Tomonth = ('0' + (graphDate.getMonth() + 1)).slice(-2);
+    var Todate = ('0' + graphDate.getDate()).slice(-2);
+    var Tohour = ('0' + graphDate.getHours()).slice(-2);
+    var Tominute = ('0' + graphDate.getMinutes()).slice(-2);
+    getTodayData(stationID, Toyear, Tomonth, Todate, Tohour, Tominute);
 
     graphDate.setDate(graphDate.getDate() - 1);
+    year = graphDate.getFullYear();
     month = ('0' + (graphDate.getMonth() + 1)).slice(-2);
     date = ('0' + graphDate.getDate()).slice(-2);
     getYesterdayData(stationID, year, month, date);
@@ -855,21 +905,28 @@ function createGraph(stationID, e) {
     var ToTempData = [];
     var YesTempData = [];
     var ToTempHigh = -100000;
-    var ToTempHighArr;
+    var ToTempHighArr = "----";
     var ToTempLow = 100000;
-    var ToTempLowArr;
+    var ToTempLowArr = "----";
     var YesTempHigh = -100000;
-    var YesTempHighArr;
+    var YesTempHighArr = "----";
     var YesTempLow = 100000;
-    var YesTempLowArr;
-    var keys = ["0000", "0010", "0020", "0030", "0040", "0050", "0100", "0110", "0120", "0130", "0140", "0150", "0200", "0210", "0220", "0230", "0240", "0250", 
-    "0300", "0310", "0320", "0330", "0340", "0350", "0400", "0410", "0420", "0430", "0440", "0450", "0500", "0510", "0520", "0530", "0540", "0550", 
-    "0600", "0610", "0620", "0630", "0640", "0650", "0700", "0710", "0720", "0730", "0740", "0750", "0800", "0810", "0820", "0830", "0840", "0850", 
-    "0900", "0910", "0920", "0930", "0940", "0950", "1000", "1010", "1020", "1030", "1040", "1050", "1100", "1110", "1120", "1130", "1140", "1150", 
-    "1200", "1210", "1220", "1230", "1240", "1250", "1300", "1310", "1320", "1330", "1340", "1350", "1400", "1410", "1420", "1430", "1440", "1450", 
-    "1500", "1510", "1520", "1530", "1540", "1550", "1600", "1610", "1620", "1630", "1640", "1650", "1700", "1710", "1720", "1730", "1740", "1750", 
-    "1800", "1810", "1820", "1830", "1840", "1850", "1900", "1910", "1920", "1930", "1940", "1950", "2000", "2010", "2020", "2030", "2040", "2050", 
-    "2100", "2110", "2120", "2130", "2140", "2150", "2200", "2210", "2220", "2230", "2240", "2250", "2300", "2310", "2320", "2330", "2340", "2350"];
+    var YesTempLowArr = "----";
+    if (param == "snow" || param == "snow1h" || param == "snow6h" || param == "snow12h" || param == "snow24h") {
+        var keys = ["0000", "0100", "0200", "0300", "0400", "0500", "0600", "0700", "0800", "0900", "1000", "1100", "1200", "1300", "1400", "1500", "1600", "1700", "1800", "1900", "2000", "2100", "2200", "2300"];
+    } else {
+        var keys = ["0000", "0010", "0020", "0030", "0040", "0050", "0100", "0110", "0120", "0130", "0140", "0150", "0200", "0210", "0220", "0230", "0240", "0250", 
+            "0300", "0310", "0320", "0330", "0340", "0350", "0400", "0410", "0420", "0430", "0440", "0450", "0500", "0510", "0520", "0530", "0540", "0550", 
+            "0600", "0610", "0620", "0630", "0640", "0650", "0700", "0710", "0720", "0730", "0740", "0750", "0800", "0810", "0820", "0830", "0840", "0850", 
+            "0900", "0910", "0920", "0930", "0940", "0950", "1000", "1010", "1020", "1030", "1040", "1050", "1100", "1110", "1120", "1130", "1140", "1150", 
+            "1200", "1210", "1220", "1230", "1240", "1250", "1300", "1310", "1320", "1330", "1340", "1350", "1400", "1410", "1420", "1430", "1440", "1450", 
+            "1500", "1510", "1520", "1530", "1540", "1550", "1600", "1610", "1620", "1630", "1640", "1650", "1700", "1710", "1720", "1730", "1740", "1750", 
+            "1800", "1810", "1820", "1830", "1840", "1850", "1900", "1910", "1920", "1930", "1940", "1950", "2000", "2010", "2020", "2030", "2040", "2050", 
+            "2100", "2110", "2120", "2130", "2140", "2150", "2200", "2210", "2220", "2230", "2240", "2250", "2300", "2310", "2320", "2330", "2340", "2350"];
+    }
+    
+    
+    
     for (let i = 0; i < ToAllDatalength; i++) {
         if (ToAllData[keys[i]]) {
             if (ToAllData[keys[i]][param]) {
@@ -889,6 +946,8 @@ function createGraph(stationID, e) {
             ToTempData.push(null);
         }
     }
+    if (ToTempHigh == -100000) {ToTempHigh = "-";} else {ToTempHigh = ToTempHigh.toFixed(1);}
+    if (ToTempLow == 100000) {ToTempLow = "-";} else {ToTempLow = ToTempLow.toFixed(1)};
 
     let yesI = 0;
     keys.forEach(element => {
@@ -911,9 +970,12 @@ function createGraph(stationID, e) {
         }
         yesI++;
     });
+    if (YesTempHigh == -100000) {YesTempHigh = "-";} else {YesTempHigh = YesTempHigh.toFixed(1);}
+    if (YesTempLow == 100000) {YesTempLow = "-";} else {YesTempLow = YesTempLow.toFixed(1)};
+    
 
     document.getElementById('tempChartStaName').innerHTML = '<ruby>'+e.target.kjName+'<rt>'+e.target.knName+'</rt></ruby>';
-    document.getElementById('tempChartLowHighTable').innerHTML = '<tr><td>最高</td><td>'+ToTempHighArr.substring(0,2)+":"+ToTempHighArr.substring(2,4)+'</td><td>'+ToTempHigh.toFixed(1)+getUnit(param)+'</td></tr><tr><td>最低</td><td>'+ToTempLowArr.substring(0,2)+":"+ToTempLowArr.substring(2,4)+'</td><td>'+ToTempLow.toFixed(1)+getUnit(param)+'</td></tr>';
+    document.getElementById('tempChartLowHighTable').innerHTML = '<tr><td>最高</td><td>'+ToTempHighArr.substring(0,2)+":"+ToTempHighArr.substring(2,4)+'</td><td>'+ToTempHigh+getUnit(param)+'</td></tr><tr><td>最低</td><td>'+ToTempLowArr.substring(0,2)+":"+ToTempLowArr.substring(2,4)+'</td><td>'+ToTempLow+getUnit(param)+'</td></tr>';
     document.getElementById('tempChartStaTemp').innerText = '現在：'+e.target.tempUnit;
 
     if (typeof myChart !== "undefined") {
@@ -923,10 +985,10 @@ function createGraph(stationID, e) {
     document.getElementById('tempChartBack').classList.add("display");
     var ctx = document.getElementById('tempChart');
     var labels_data;
-    // if (param == "snow" || param == "snow1h" || param == "snow6h" || param == "snow12h" || param == "snow24h") {
-    //     labels_data = ["00:00", "01:00", "02:00", "03:00","04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00",
-    //      "13:00", "14:00", "15:00", "16:00", "17:00", "18:00" ,"19:00", "20:00", "21:00" , "22:00", "23:00"]
-    // } else {
+    if (param == "snow" || param == "snow1h" || param == "snow6h" || param == "snow12h" || param == "snow24h") {
+        labels_data = ["00:00", "01:00", "02:00", "03:00","04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00",
+         "13:00", "14:00", "15:00", "16:00", "17:00", "18:00" ,"19:00", "20:00", "21:00" , "22:00", "23:00"]
+    } else {
         labels_data = ["00:00", "00:10", "00:20", "00:30", "00:40", "00:50", "01:00", "01:10", "01:20", "01:30", "01:40", "01:50", 
         "02:00", "02:10", "02:20", "02:30", "02:40", "02:50", "03:00", "03:10", "03:20", "03:30", "03:40", "03:50", 
         "04:00", "04:10", "04:20", "04:30", "04:40", "04:50", "05:00", "05:10", "05:20", "05:30", "05:40", "05:50", 
@@ -939,7 +1001,7 @@ function createGraph(stationID, e) {
         "18:00", "18:10", "18:20", "18:30", "18:40", "18:50", "19:00", "19:10", "19:20", "19:30", "19:40", "19:50", 
         "20:00", "20:10", "20:20", "20:30", "20:40", "20:50", "21:00", "21:10", "21:20", "21:30", "21:40", "21:50", 
         "22:00", "22:10", "22:20", "22:30", "22:40", "22:50", "23:00", "23:10", "23:20", "23:30", "23:40", "23:50"];
-    // }
+    }
     var data = {
         labels: labels_data,
         datasets: [{
@@ -947,6 +1009,7 @@ function createGraph(stationID, e) {
             data: ToTempData,
             lineTension: 0.1,
             borderColor: "#ffff55",
+            // backgroundColor: "#ffff55",
             order: 1,
             borderWidth: 5
         }, {
@@ -954,6 +1017,7 @@ function createGraph(stationID, e) {
             data: YesTempData,
             lineTension: 0.1,
             borderColor: "#ffffff",
+            // backgroundColor: "#ffffff",
             borderDash: [8,4],
             order: 2,
             borderWidth: 3
@@ -1037,7 +1101,7 @@ function createGraph(stationID, e) {
                         backgroundColor: '#222222',
                         xValue: ToTempHighArr.substring(0,2)+":"+ToTempHighArr.substring(2,4),
                         xAdjust: 22,
-                        yValue: ToTempLow.toFixed(1),
+                        yValue: ToTempLow,
                         yAdjust: -6,
                         padding: 3,
                         textAlign: 'left',
@@ -1051,7 +1115,7 @@ function createGraph(stationID, e) {
                         backgroundColor: '#222222',
                         xValue: ToTempLowArr.substring(0,2)+":"+ToTempLowArr.substring(2,4),
                         xAdjust: 22,
-                        yValue: ToTempHigh.toFixed(1),
+                        yValue: ToTempHigh,
                         yAdjust: 6,
                         padding: 3,
                         textAlign: 'left',
@@ -1090,19 +1154,32 @@ function createGraph(stationID, e) {
                 color: "#ffffff",
                 font: {size: 16,family: "'ヒラギノ角ゴ-Pro','Noto Sans JP'",weight: "500"},
                 callback: function(tick) {
-                    let arr2 = [0,18,36,54,72,90,108,126];
-                    if (tick == 143) {
-                        return 24;
-                    } else {
-                    if (tick%6 == 0) {
-                        if (arr2.includes(Number(tick))) {
-                            return tick/6;
+                    if (param == "snow" || param == "snow1h" || param == "snow6h" || param == "snow12h" || param == "snow24h") {
+                        let arr2 = [0,3,6,9,12,15,18,21];
+                        if (tick == 24) {
+                            return 24;
                         } else {
-                            return "・";
+                            if (arr2.includes(Number(tick))) {
+                                return tick;
+                            } else {
+                                return "・";
+                            }
                         }
                     } else {
-                        return;
-                    }}
+                        let arr2 = [0,18,36,54,72,90,108,126];
+                        if (tick == 143) {
+                            return 24;
+                        } else {
+                        if (tick%6 == 0) {
+                            if (arr2.includes(Number(tick))) {
+                                return tick/6;
+                            } else {
+                                return "・";
+                            }
+                        } else {
+                            return;
+                        }}
+                    }
                 },
                 maxRotation: 0,
                 minRotation: 0
@@ -1128,27 +1205,30 @@ function createGraph(stationID, e) {
                               param == "normalPressure" ? 1000 :
                               param == "humidity" ? 0 :
                               param == "sun10m" ? 0 :
-                              param == "sun1h" ? 0 : 5,
+                              param == "sun1h" ? 0 :
+                              param == "wind" ? 0 : 5,
 
                 suggestedMax: param == "pressure" ? 1030 :
                               param == "normalPressure" ? 1040 :
                               param == "humidity" ? 100 :
                               param == "sun10m" ? 10 :
-                              param == "sun1h" ? 1 : 25,
+                              param == "sun1h" ? 1 :
+                              param == "wind" ? 5 : 25,
             }
         }
     };
     window.myChart = new Chart(ctx, {
         type:   param == 'temp' ? 'line' :
                 param == 'humidity' ? 'line' :
-                param == 'snow' ? 'bar' :
+                param == 'wind' ? 'line' :
+                param == 'snow' ? 'line' :
                 param == 'snow1h' ? 'bar' :
                 param == 'snow3h' ? 'bar' :
                 param == 'snow12h' ? 'bar' :
                 param == 'snow24h' ? 'bar' :
                 param == 'sun10m' ? 'line' :
                 param == 'sun1h' ? 'line' :
-                param == 'snow10m' ? 'bar' :
+                param == 'precipitation10m' ? 'bar' :
                 param == 'precipitation1h' ? 'bar' :
                 param == 'precipitation3h' ? 'bar' :
                 param == 'precipitation24h' ? 'bar' :
@@ -1189,6 +1269,7 @@ function timeBefore(time) {
         }
         document.getElementById('title_time').innerHTML = latestTime.substring(4,6)+'<span class="small">月</span>'+latestTime.substring(6,8)+'<span class="small">日</span> '+latestTime.substring(8,10)+'<span class="small">時</span>'+latestTime.substring(10,12)+'<span class="small">分</span>現在';
         nowcastDate = new Date(year, month - 1, day, hour, minute, "00");
+        graphDate = new Date(year, month - 1, day, hour, minute, "00");
         nowcastDate.setHours(nowcastDate.getHours() - 9);
         console.log(latestTime+".json を取得中です…。");
         (async() => {
@@ -1225,6 +1306,7 @@ function timeAfter(time) {
         }
         document.getElementById('title_time').innerHTML = latestTime.substring(4,6)+'<span class="small">月</span>'+latestTime.substring(6,8)+'<span class="small">日</span> '+latestTime.substring(8,10)+'<span class="small">時</span>'+latestTime.substring(10,12)+'<span class="small">分</span>現在';
         nowcastDate = new Date(year, month - 1, day, hour, minute, "00");
+        graphDate = new Date(year, month - 1, day, hour, minute, "00");
         nowcastDate.setHours(displayDate.getHours() - 9);
         console.log(latestTime+".json を取得中です…。");
         (async() => {
@@ -1278,10 +1360,6 @@ function goPoint(latlng, key) {
         }, 500);
     }, 1000);
 }
-
-setInterval(() => {
-    TempInfo_get();
-}, 300000);
 
 document.getElementById('ranking_lowtemp').addEventListener("click",()=>{
     document.getElementById('ranking_table').classList.add('display');

@@ -26,6 +26,7 @@
         <link rel="stylesheet" href="../../static/font/fonts.css">
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-9SL593EYR6"></script>
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/leaflet-rotatedmarker"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZL8HPL24E7"></script>
@@ -79,6 +80,7 @@
                     <button data-mode="sun10m" onclick="modeChange(event)" class="mode_btn">10分</button>
                     <button data-mode="sun1h" onclick="modeChange(event)" class="mode_btn">1時間</button>
                 </span>
+                <button data-mode="wind" onclick="modeChange(event)" class="mode_btn">風向</button>
                 <button data-mode="snow" onclick="modeChange(event)" class="mode_btn">積雪深</button>
                 <span class="setsumei">降雪量
                     <button data-mode="snow1h" onclick="modeChange(event)" id="mode_snow1h" class="mode_btn">1時間</button>
@@ -88,7 +90,7 @@
                 </span>
                 <span class="setsumei">気圧
                     <button data-mode="pressure" onclick="modeChange(event)" class="mode_btn">現地</button>
-                    <button data-mode="normalPressure" onclick="modeChange(event)" class="mode_btn">海面更正</button>
+                    <button data-mode="normalPressure" onclick="modeChange(event)" class="mode_btn">海面</button>
                 </span>
             </div>
         </div>
@@ -111,7 +113,7 @@
         <div class="hanrei">
             <table cellspacing="0" cellpadding="0">
                 <tr style="font-size: 0.7rem;">
-                    <td class="hanrei_td1"></td>
+                    <td class="hanrei_td1" align="left" id="hanrei_td0_1"></td>
                     <td class="hanrei_td2">以上</td>
                     <td class="hanrei_td3"></td>
                     <td class="hanrei_td2">未満</td>
