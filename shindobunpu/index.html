@@ -253,7 +253,7 @@
             }
             #shindo_ichiran .shindo_ichiran_title::before {left:0;}
             #shindo_ichiran .shindo_ichiran_title::after {right: 0;}
-            #shindo__article, #shindo7_article, #shindo65_article, #shindo60_article, #shindo55_article, #shindo50_article, #shindo4_article, #shindo3_article, #shindo2_article, #shindo1_article {
+            #shindo__article, #shindo7_article, #shindo65_article, #shindo60_article, #shindo55_article, #shindo50_article, #shindo4_article, #shindo3_article, #shindo2_article, #shindo1_article, #shindoN_article {
                 margin-top: 0.3em;
                 margin-bottom: 0.7em;
                 font-size: 0.8em;
@@ -415,11 +415,6 @@
             <div class="shindo_ichiran_title">各地の震度</div>
             <div id="shindoichiran_title_num">全 000<span class="small">ヶ所</span></div>
             <hr>
-            <div id="shindo_">
-                <div class="shindo_ichiran_kakutitle">震度<img src="source/eqm_int_.png"></div>
-                <div id="shindo__article"><ruby>○○市○○<rt>まるまるしまるまる</rt></ruby>　<ruby>△△市△△<rt>さんかくさんかくしさんかくさんかく</rt></ruby>　<ruby>□□町□□<rt>しかくしかくまちしかくしかく</rt></ruby></div>
-                <hr>
-            </div>
             <div id="shindo7">
                 <div class="shindo_ichiran_kakutitle">震度<img src="source/eqm_int7.png"></div>
                 <div id="shindo7_article"><ruby>○○市○○<rt>まるまるしまるまる</rt></ruby>　<ruby>△△市△△<rt>さんかくさんかくしさんかくさんかく</rt></ruby>　<ruby>□□町□□<rt>しかくしかくまちしかくしかく</rt></ruby></div>
@@ -465,6 +460,16 @@
                 <div id="shindo1_article"><ruby>○○市○○<rt>まるまるしまるまる</rt></ruby>　<ruby>△△市△△<rt>さんかくさんかくしさんかくさんかく</rt></ruby>　<ruby>□□町□□<rt>しかくしかくまちしかくしかく</rt></ruby></div>
                 <hr>
             </div>
+            <div id="shindo_">
+                <div class="shindo_ichiran_kakutitle">震度<img src="source/eqm_int_.png"></div>
+                <div id="shindo__article"><ruby>○○市○○<rt>まるまるしまるまる</rt></ruby>　<ruby>△△市△△<rt>さんかくさんかくしさんかくさんかく</rt></ruby>　<ruby>□□町□□<rt>しかくしかくまちしかくしかく</rt></ruby></div>
+                <hr>
+            </div>
+            <div id="shindoN">
+                <div class="shindo_ichiran_kakutitle">観測点情報なし<img src="source/eqm_intN.png"></div>
+                <div id="shindoN_article"><ruby>○○市○○<rt>まるまるしまるまる</rt></ruby>　<ruby>△△市△△<rt>さんかくさんかくしさんかくさんかく</rt></ruby>　<ruby>□□町□□<rt>しかくしかくまちしかくしかく</rt></ruby></div>
+                <hr>
+            </div>
         </div>
         <div id="appinfo">
             <span class="material-symbols-outlined cap" id="info_closebtn">close</span>
@@ -495,6 +500,8 @@
                 minZoom: 2,
                 scrollWheelZoom: false,
                 smoothWheelZoom: true,
+                smoothSensitivity: 1.5,
+                preferCanvas:true,
             });
             L.control.scale({ maxWidth: 150, position: 'bottomright', imperial: false }).addTo(map);  // スケールを表示
             map.zoomControl.setPosition('topright');
@@ -1011,6 +1018,7 @@
                     let shingenIcon = L.icon({
                         iconUrl: 'source/shingen.png',
                         iconSize: [40,40],
+                        iconAnchor: [20, 20],
                         popupAnchor: [0,-40]
                     });
                     //震源の座標
@@ -1090,7 +1098,7 @@
                         tsunami_text = "情報なし";
                     }
                     //すべてを結合して震源アイコンを地図に表示
-                    shingen_icon.bindPopup('発生時刻：'+(QuakeJson[num]['earthquake']['time'])+'<br>最大震度：'+maxint_text+'<br>震源地：'+Name+'<span style=\"font-size: 85%;\"> ('+QuakeJson[num]["earthquake"]["hypocenter"]["longitude"]+", "+QuakeJson[num]["earthquake"]["hypocenter"]["latitude"]+')</span><br>規模：M'+Magnitude+'　深さ：'+depth+'<br>受信：'+QuakeJson[num]['issue']['time']+', '+QuakeJson[num]['issue']['source'],{closeButton: false, zIndexOffset: 10000});
+                    shingen_icon.bindPopup('発生時刻：'+(QuakeJson[num]['earthquake']['time'])+'<br>最大震度：'+maxint_text+'<br>震源地：'+Name+'<span style=\"font-size: 85%;\"> ('+QuakeJson[num]["earthquake"]["hypocenter"]["latitude"]+", "+QuakeJson[num]["earthquake"]["hypocenter"]["longitude"]+')</span><br>規模：M'+Magnitude+'　深さ：'+depth+'<br>受信：'+QuakeJson[num]['issue']['time']+', '+QuakeJson[num]['issue']['source'],{closeButton: false, zIndexOffset: 10000});
                     //震源アイコンにマウスが乗ったときにポップアップを表示
                     //thisは震源アイコンのこと
                     shingen_icon.on('mouseover', function (e) {
@@ -1121,6 +1129,7 @@
                     document.getElementById('shindo65').classList.remove('display');
                     document.getElementById('shindo7').classList.remove('display');
                     document.getElementById('shindo_').classList.remove('display');
+                    document.getElementById('shindoN').classList.remove('display');
                     document.getElementById('shindo1_article').innerHTML = "";
                     document.getElementById('shindo2_article').innerHTML = "";
                     document.getElementById('shindo3_article').innerHTML = "";
@@ -1131,9 +1140,9 @@
                     document.getElementById('shindo65_article').innerHTML = "";
                     document.getElementById('shindo7_article').innerHTML = "";
                     document.getElementById('shindo__article').innerHTML = "";
+                    document.getElementById('shindoN_article').innerHTML = "";
 
                     //震度一覧の数が何個あったか
-                    var maxint__num = 0;
                     var maxint1_num = 0;
                     var maxint2_num = 0;
                     var maxint3_num = 0;
@@ -1143,6 +1152,8 @@
                     var maxint60_num = 0;
                     var maxint65_num = 0;
                     var maxint7_num = 0;
+                    var maxint__num = 0;
+                    var maxintN_num = 0;
                     
                     if (QuakeJson[num]["issue"]["type"] != "ScalePrompt") { //各地の震度に関する情報
                         document.getElementById('title_text').innerText = "震度分布図 - 観測点モード";
@@ -1191,10 +1202,10 @@
                                     maxint50_num++;
                                 } else if (element["scale"] == 46) {
                                     eval('PointColor = '+icon_theme+'_backColor_50');
-                                    ImgUrl = "source/"+icon_theme+"_int50.png";
+                                    ImgUrl = "source/"+icon_theme+"_int_.png";
                                     PointShindo = "震度5弱以上と推定";
-                                    shindo_ichiran_doko = "document.getElementById('shindo50_article')";
-                                    maxint50_num++;
+                                    shindo_ichiran_doko = "document.getElementById('shindo__article')";
+                                    maxint__num++;
                                 } else if (element["scale"] == 50) {
                                     eval('PointColor = '+icon_theme+'_backColor_55');
                                     ImgUrl = "source/"+icon_theme+"_int55.png";
@@ -1266,8 +1277,12 @@
                                         filled_list[areaCode] = element["scale"];
                                     }
                                 }
+                            } else {
+                                var shindo_ichiran_doko;
+                                shindo_ichiran_doko = "document.getElementById('shindoN_article')";
+                                maxintN_num++;
+                                eval(shindo_ichiran_doko+'.innerHTML += "<ruby>'+element["addr"] + '<rt>フリガナフメイ</rt></ruby>　"');
                             }
-                            
                         });
                         //for(... in ...)もforEachと同等。keyに連想配列の名前が入る
                         for (key in filled_list){ 
@@ -1339,10 +1354,10 @@
                                 maxint50_num++;
                             } else if (element["scale"] == 46) {
                                 eval('PointColor = '+icon_theme+'_backColor_50');
-                                ImgUrl = "source/"+icon_theme+"_int50.png";
+                                ImgUrl = "source/"+icon_theme+"_int_.png";
                                 PointShindo = "震度5弱以上と推定";
-                                shindo_ichiran_doko = "document.getElementById('shindo50_article')";
-                                maxint50_num++;
+                                shindo_ichiran_doko = "document.getElementById('shindo__article')";
+                                maxint__num++;
                             } else if (element["scale"] == 50) {
                                 eval('PointColor = '+icon_theme+'_backColor_55');
                                 ImgUrl = "source/"+icon_theme+"_int55.png";
@@ -1406,17 +1421,18 @@
                     let shindo_ichiran_kakutitle = document.getElementsByClassName('shindo_ichiran_kakutitle');
                     let shindo_ichiran_kakutitle_1 = '震度<img src="source/'+icon_theme+'_int';
                     let shindo_ichiran_kakutitle_2 = '<span class="kasho_small">ヶ所</span>';
-                    shindo_ichiran_kakutitle[0].innerHTML = shindo_ichiran_kakutitle_1+'_.png">　'+maxint__num+shindo_ichiran_kakutitle_2;
-                    shindo_ichiran_kakutitle[1].innerHTML = shindo_ichiran_kakutitle_1+'7.png">　'+maxint7_num+shindo_ichiran_kakutitle_2;
-                    shindo_ichiran_kakutitle[2].innerHTML = shindo_ichiran_kakutitle_1+'65.png">　'+maxint65_num+shindo_ichiran_kakutitle_2;
-                    shindo_ichiran_kakutitle[3].innerHTML = shindo_ichiran_kakutitle_1+'60.png">　'+maxint60_num+shindo_ichiran_kakutitle_2;
-                    shindo_ichiran_kakutitle[4].innerHTML = shindo_ichiran_kakutitle_1+'55.png">　'+maxint55_num+shindo_ichiran_kakutitle_2;
-                    shindo_ichiran_kakutitle[5].innerHTML = shindo_ichiran_kakutitle_1+'50.png">　'+maxint50_num+shindo_ichiran_kakutitle_2;
-                    shindo_ichiran_kakutitle[6].innerHTML = shindo_ichiran_kakutitle_1+'4.png">　'+maxint4_num+shindo_ichiran_kakutitle_2;
-                    shindo_ichiran_kakutitle[7].innerHTML = shindo_ichiran_kakutitle_1+'3.png">　'+maxint3_num+shindo_ichiran_kakutitle_2;
-                    shindo_ichiran_kakutitle[8].innerHTML = shindo_ichiran_kakutitle_1+'2.png">　'+maxint2_num+shindo_ichiran_kakutitle_2;
-                    shindo_ichiran_kakutitle[9].innerHTML = shindo_ichiran_kakutitle_1+'1.png">　'+maxint1_num+shindo_ichiran_kakutitle_2;
-                    let maxint_sum = maxint__num+maxint1_num+maxint2_num+maxint3_num+maxint4_num+maxint50_num+maxint55_num+maxint60_num+maxint65_num+maxint7_num;
+                    shindo_ichiran_kakutitle[0].innerHTML = shindo_ichiran_kakutitle_1+'7.png">　'+maxint7_num+shindo_ichiran_kakutitle_2;
+                    shindo_ichiran_kakutitle[1].innerHTML = shindo_ichiran_kakutitle_1+'65.png">　'+maxint65_num+shindo_ichiran_kakutitle_2;
+                    shindo_ichiran_kakutitle[2].innerHTML = shindo_ichiran_kakutitle_1+'60.png">　'+maxint60_num+shindo_ichiran_kakutitle_2;
+                    shindo_ichiran_kakutitle[3].innerHTML = shindo_ichiran_kakutitle_1+'55.png">　'+maxint55_num+shindo_ichiran_kakutitle_2;
+                    shindo_ichiran_kakutitle[4].innerHTML = shindo_ichiran_kakutitle_1+'50.png">　'+maxint50_num+shindo_ichiran_kakutitle_2;
+                    shindo_ichiran_kakutitle[5].innerHTML = shindo_ichiran_kakutitle_1+'4.png">　'+maxint4_num+shindo_ichiran_kakutitle_2;
+                    shindo_ichiran_kakutitle[6].innerHTML = shindo_ichiran_kakutitle_1+'3.png">　'+maxint3_num+shindo_ichiran_kakutitle_2;
+                    shindo_ichiran_kakutitle[7].innerHTML = shindo_ichiran_kakutitle_1+'2.png">　'+maxint2_num+shindo_ichiran_kakutitle_2;
+                    shindo_ichiran_kakutitle[8].innerHTML = shindo_ichiran_kakutitle_1+'1.png">　'+maxint1_num+shindo_ichiran_kakutitle_2;
+                    shindo_ichiran_kakutitle[9].innerHTML = shindo_ichiran_kakutitle_1+'_.png">　'+maxint__num+shindo_ichiran_kakutitle_2;
+                    shindo_ichiran_kakutitle[10].innerHTML = '観測点情報なし<img src="source/'+icon_theme+'_intN.png">　'+maxintN_num+shindo_ichiran_kakutitle_2;
+                    let maxint_sum = maxint__num+maxint1_num+maxint2_num+maxint3_num+maxint4_num+maxint50_num+maxint55_num+maxint60_num+maxint65_num+maxint7_num+maxintN_num;
                     document.getElementById('shindoichiran_title_num').innerHTML = '全 '+maxint_sum+'<span class="small">ヶ所</span>';
                     if (document.getElementById('shindo1_article').innerHTML == "") {document.getElementById('shindo1').classList.add('display')}
                     if (document.getElementById('shindo2_article').innerHTML == "") {document.getElementById('shindo2').classList.add('display')}
@@ -1428,6 +1444,7 @@
                     if (document.getElementById('shindo65_article').innerHTML == "") {document.getElementById('shindo65').classList.add('display')}
                     if (document.getElementById('shindo7_article').innerHTML == "") {document.getElementById('shindo7').classList.add('display')}
                     if (document.getElementById('shindo__article').innerHTML == "") {document.getElementById('shindo_').classList.add('display')}
+                    if (document.getElementById('shindoN_article').innerHTML == "") {document.getElementById('shindoN').classList.add('display')}
                     
                     if (point_onoff == 1) {
                         map.addLayer(shindo_layer);
@@ -1443,7 +1460,7 @@
                         }
                     } else {
                         //map.flyTo(fly_shingen_lnglat, 7.5, { duration: 0.5 });
-                        map.flyTo(fly_shingen_lnglat, 8, { duration: 0.5 })
+                        map.flyTo(fly_shingen_lnglat, 8, { duration: 0.5 });
                     }
                     Cookies.set('visited','already');
                 
