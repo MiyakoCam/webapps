@@ -316,7 +316,7 @@
                 scrollWheelZoom: false,
                 smoothWheelZoom: true,
                 smoothSensitivity: 1.5,
-                preferCanvas:true,
+                preferCanvas:false,
             });
             L.control.scale({ maxWidth: 150, position: 'bottomright', imperial: false }).addTo(map);  // スケールを表示
             map.zoomControl.setPosition('topright');
@@ -362,7 +362,7 @@
             $.getJSON("https://miyakocam.github.io/geojsons/asia.geojson", function (data) {
                 asia_data = data;
                 asia = L.geoJson(asia_data, {
-                    pane: "shindo30",
+                    pane: "shindo10",
                     style: PolygonLayer_Style_2,
     attribution: "<a href='https://www.jma.go.jp/' target='_blank'>気象庁</a>"
                 }).addTo(map);
@@ -370,14 +370,14 @@
             $.getJSON("https://miyakocam.github.io/geojsons/countries.geojson", function (data) {
                 countries_data = data;
                 countries = L.geoJson(countries_data, {
-                    pane: "shindo30",
+                    pane: "shindo10",
                     style: PolygonLayer_Style_2,
                 }).addTo(map);
             });
-            $.getJSON("https://miyakocam.github.io/geojsons/saibun.geojson", function (data) {
+            $.getJSON("https://miyakocam.github.io/geojsons/pref.geojson", function (data) {
                 japan_data = data;
                 japan = L.geoJson(japan_data, {
-                    pane: "shindo30",
+                    pane: "shindo10",
                     style: PolygonLayer_Style_1,
                     attribution: "MiyakojimaCam"
                 }).addTo(map);
@@ -424,16 +424,6 @@
             allList = L.layerGroup();
             map.removeLayer(typhoonTextList);
             typhoonTextList = L.layerGroup();
-            if (already == true || already == "true") {
-                while (list.lastChild) {
-                        list.removeChild(list.lastChild);
-                }
-                Test_typhoonList.forEach(element => {
-                tropicalCyclone = element["tropicalCyclone"];
-                Test_element = element;
-                drawData();
-                });
-            } else {
                 $.when(
                 $.getJSON("https://www.jma.go.jp/bosai/typhoon/data/targetTc.json")
                 // $.getJSON("source/targetTc.json")
@@ -460,18 +450,7 @@
                             Test_Json = Json;
                             Test_T_DATA = T_DATA;
                             Test_element = element;
-                            drawData();
-                        }
-                    )
-                    });
-                }
-                )
-            }
-            }
-
-            function drawData(whiledisplayOnOff) {
-
-                if (Test_T_DATA[0][0]["typhoonNumber"]) {
+                            if (Test_T_DATA[0][0]["typhoonNumber"]) {
                     if (isNaN(Test_T_DATA[0][0]["typhoonNumber"]) == false) {T_number = '第' + Number(Test_T_DATA[0][0]["typhoonNumber"].substring(2,4)) + '号';} 
                     else {T_number = Test_T_DATA[0][0]["typhoonNumber"];}
                 }
@@ -544,7 +523,7 @@
                     kyofu_latlng = new L.LatLng(J_kyofu_center[0], J_kyofu_center[1]);
                     kyofu_radius = Test_Json[0][1]["galeWarningArea"]["radius"];
                     kyofu_radius_km = Math.round(kyofu_radius/10000) * 10;
-                    kyofu_marker = L.circle(kyofu_latlng, {pane: "shindo20", radius:kyofu_radius, weight: 2, opacity:1,fillColor: "#ffff00",fillOpacity:0.2,color:"#ffff00"}).addTo(allList);
+                    kyofu_marker = L.circle(kyofu_latlng, {pane: "shindo30", radius:kyofu_radius, weight: 2, opacity:1,fillColor: "#ffff00",fillOpacity:0.2,color:"#ffff00"}).addTo(allList);
                     kyofu_marker.bindTooltip('強風域　風速15m/s以上<br>半径：'+kyofu_radius_km+'km',{direction: "right"});
                 }
                 
@@ -584,12 +563,19 @@
                         center_marker.bindTooltip(i1+'<br>'+i3+'<br>'+i4+'<br>'+i5+'<br>'+i6+'<br>'+i7+'<br>'+i8 ,{direction: "left",className: "center_circle_tooltip", offset: [-30, 0]});
                     }
                 }
+                        }
+                    )
+                    });
+                }
+                )
+            }
+
+            function drawData(whiledisplayOnOff) {
+                
                 // allList.addTo(map);
             }
 
             function drawSubText(whiledisplayOnOff) {
-
-                console.log('押されたよ～ん1');
                 J_h_center = Test_Json[0][yokuwakarantokonoi]["center"];
                 J_h_radius = Test_Json[0][yokuwakarantokonoi]["probabilityCircle"]["radius"];
                 J_h_latlng = new L.LatLng(J_h_center[0], J_h_center[1]);
@@ -608,7 +594,6 @@
                 center_circle.bindTooltip(i1+'<br>'+i3+'<br>'+i4+'<br>'+i5+'<br>'+i6+'<br>'+i7+'<br>'+i8 ,{direction: "left",className: "center_circle_tooltip", offset: [-30, 0]});
 
                 // if (whiledisplayOnOff != undefined) {
-                    console.log('押されたよ～ん2');
                     var datetime; var datetime_text;
                     var textMatome = '<div class="leaflet_datetext">'; // これに集約
                     datetime = Test_Json[0][yokuwakarantokonoi]["validtime"]["JST"].split('T');
@@ -687,7 +672,7 @@
             });
             
             document.getElementById('tekiyou_whiledisplay').addEventListener("click",()=>{
-                getData(true);
+                getData();
                 allList.addTo(map);
                 typhoonTextList.addTo(map);
                 document.getElementById('whiledisplay').classList.remove('display');
