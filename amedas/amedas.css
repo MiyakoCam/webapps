@@ -68,6 +68,17 @@ html, body {
     border-bottom: none;
     border-top: none;
 }
+select, input, button {
+    outline: none;
+}
+input[type="number"]::-webkit-outer-spin-button, 
+input[type="number"]::-webkit-inner-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+} 
+input[type="number"] { 
+    -moz-appearance:textfield; 
+}
 .btns {
     position: absolute;
     bottom: 5px;
@@ -75,7 +86,7 @@ html, body {
     z-index: 10000;
     user-select: none;
 }
-.reload, .mode_btn, .setsumei, #tempChartBackreload, #tempChartBacktooltip {
+.reload, #autoreload, .mode_btn, .setsumei, #tempChartBackreload, #tempChartBacktooltip {
     background: #000000aa;
     border: white 2.5px solid;
     border-radius: 5px;
@@ -94,6 +105,31 @@ html, body {
 .setsumei button {
     background: #00000000;
     padding: 4px 5px;
+}
+.autoreload_setsumei.on {
+    background: #ffffff;
+    color: black;
+}
+.autoreload_setsumei.on button, .autoreload_setsumei.on input {
+    color: black!important;
+}
+.autoreload_setsumei.on input {
+    border-bottom: #000000 1px solid!important;
+}
+#autoreload {
+    background: #00000000;
+    padding: 5px;
+    border: none;
+}
+#autoreload_num {
+    background: #00000000;
+    border: 0;
+    width: 2rem;
+    font-family: "ヒラギノ角ゴ-Pro",'Noto Sans JP';
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: white;
+    border-bottom: #ffffff 1px solid;
 }
 .hanrei {
     background: #00000088;
@@ -145,13 +181,65 @@ html, body {
     line-height: 1.2em;
     z-index: 10000;
     display: none;
+    font-size: 0.9rem;
 }
 #amagumo_settings.display {
     display: block;
 }
-#amagumo_settings_range {
+#amagumo_settings_range, #liden_settings_opacity, #liden_settings_size {
     width: 10rem;
 }
+#liden_settings_period_10m, #liden_settings_period_all {
+    display: none;
+}
+#liden_settings_period_box {
+    display: flex;
+    justify-content: center;
+    margin: 5px 0;
+    cursor: pointer;
+}
+#liden_settings_period_10m_label, #liden_settings_period_all_label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 5rem;
+    height: 1.5rem;
+    border: #1f57be 2px solid;
+    text-align: center;
+}
+#liden_settings_period_10m_label {
+    border-radius: 1rem 0 0 1rem;
+    border-right: #1f57be 1px solid;
+}
+#liden_settings_period_10m_span {
+    padding-left: 0.3rem;
+}
+#liden_settings_period_all_label {
+    border-radius: 0 1rem 1rem 0;
+    border-left: #1f57be 1px solid;
+}
+#liden_settings_period_all_span {
+    padding-right: 0.3rem;
+}
+.shindoichiran input[type=checkbox], #shindoiconbig_check {
+    display: none;
+}
+#liden_settings_period_10m:checked+#liden_settings_period_10m_label, #liden_settings_period_all:checked+#liden_settings_period_all_label {
+    color: white;
+    background: #1f57be;
+}
+#liden_settings_redraw {
+    margin: 3px 0;
+    padding: 2px 1px 1px 1px;
+    border: #1f57be 2px solid;
+    width: 10rem;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    color: #1f57be;
+    text-align: center;
+    cursor: pointer;
+}
+
 .leaflet-tooltip {
     background-color: rgba(255, 255, 255);
     box-shadow: 0px 3px 5px 1px rgba(0, 0, 0, 0.2);
@@ -160,6 +248,10 @@ html, body {
     font-weight: 600;
     font-size: 1.4rem;
     padding: 20px 5px 0px 5px;
+}
+.lidenTooltip {
+    font-size: 0.9rem!important;
+    padding: 5px!important;
 }
 .leaflet-tooltip:before, .leaflet-tooltip:after {
     content: "";
@@ -242,7 +334,7 @@ html, body {
     top: 50%;
     transform: translateY(-50%);
 }
-#tempChartBackClose {
+#tempChartBackClose, #tempChartWaitClose {
     font-size: 1.5rem;
     color: white;
     position: absolute;
@@ -268,7 +360,7 @@ html, body {
 #tempChartWait.display {
     display: block;
 }
-#tempChartWait span {
+#tempChartWait span:not(#tempChartWaitClose) {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -310,3 +402,13 @@ html, body {
     outline: #ffffff 2px solid;
 }
 #tempChartStaName rt {font-size: 0.7em;}
+
+/* 地図外ツールチップ */
+#tippy-1, .tippy-box {
+    font-weight: 500;
+    z-index: 1000000!important;
+}
+
+.nowcast_tile_img {
+    image-rendering: pixelated;
+}

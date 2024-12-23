@@ -78,7 +78,8 @@ input[type="number"]::-webkit-inner-spin-button {
     margin: 0; 
 } 
 input[type="number"] { 
-    -moz-appearance:textfield; 
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
 .btns {
     position: absolute;
@@ -164,6 +165,7 @@ input[type="number"] {
 #overview span.color1 {background-color: #ffd000;color: #000000;border: #ffffff 1px solid;}
 #overview span.color2 {background-color: #dd0000;color: #ffffff;border: #ffffff 1px solid;}
 #overview span.color3 {background-color: #aa00dd;color: #ffffff;border: #ffffff 1px solid;}
+#overview span.color4 {background-color: #000000;color: #ffffff;border: #ffffff 1px solid;}
 
 #text_yososhindo {
     width: 100%;
@@ -248,6 +250,7 @@ input[type="number"] {
 #text_yososhindo td span.color1 {background-color: #ffd000;color: #000000;border: #ffffff 2px solid;}
 #text_yososhindo td span.color2 {background-color: #dd0000;color: #ffffff;border: #ffffff 2px solid;}
 #text_yososhindo td span.color3 {background-color: #aa00dd;color: #ffffff;border: #ffffff 2px solid;}
+#text_yososhindo td span.color4 {background-color: #000000;color: #ffffff;border: #ffffff 2px solid;}
 rt {font-size: 0.6em;}
 
 #mikata_text_yososhindo {

@@ -29,6 +29,10 @@
         <script src="https://cdn.jsdelivr.net/npm/leaflet-rotatedmarker"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+        <script src="https://unpkg.com/@popperjs/core@2"></script>
+        <script src="source/tippy-bundle.umd.min.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/tippy.js@6.3.7/animations/perspective.css">
+        <link rel="stylesheet" href="https://unpkg.com/tippy.js@6.3.7/themes/material.css">
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZL8HPL24E7"></script>
         <script>
         window.dataLayer = window.dataLayer || [];
@@ -50,6 +54,7 @@
                 <button class="mode_btn" id="amagumo_btn">表示</button>
                 <input type="checkbox" id="ranking_lowtemp"><label for="ranking_lowtemp">低順位</label>
                 <input type="checkbox" id="ranking_hightemp"><label for="ranking_hightemp">高順位</label>
+                <span class="setsumei autoreload_setsumei" style="padding: 0;padding-right: 5px;"><button id="autoreload">自動更新</button> <input type="number" id="autoreload_num" value="5">分</span>
                 <span class="setsumei" style="background: #0000ff77;">◀
                     <button class="mode_btn" onclick="timeBefore(this.innerText)">1d</button>
                     <button class="mode_btn" onclick="timeBefore(this.innerText)">12h</button>
@@ -97,14 +102,33 @@
 
         <div id="amagumo_settings">
             <span style="position: absolute;font-size: 0.9rem;top: 0;right: 0;padding:5px;cursor: pointer;" id="amagumo_settings_close">×</span>
-            <input type="checkbox" id="amagumo_settings_checkbox_amedas" checked><label for="amagumo_settings_checkbox_amedas">アメダスを表示</label>
+            <input type="checkbox" id="amagumo_settings_checkbox_amedas" checked><label for="amagumo_settings_checkbox_amedas">アメダスを表示</label><br>
+            <input type="checkbox" id="amagumo_settings_checkbox_mlit" checked><label for="amagumo_settings_checkbox_mlit">国交省雨量計を表示</label><br>
+            <span style="font-size: 0.9rem;">国交省雨量計のz-index</span><br>
+            <input type="number" style="width: 5rem;font-size: 0.9rem;" id="mlit_settings_zindex" value="90" placeholder="90">
             <hr>
             <input type="checkbox" id="amagumo_settings_checkbox" checked><label for="amagumo_settings_checkbox">雨雲レーダーを表示</label>
             <br><span style="font-size: 0.9rem;">雨雲レーダーの透過度</span><br>
-            <input type="range" id="amagumo_settings_range" min="0" max="1" step="0.01" value="0.50">
-            <br>設定値：<span id="amagumo_settings_range_span">0.50</span><br>
+            <input type="range" id="amagumo_settings_range" min="0" max="1" step="0.01" value="0.75">
+            <br>設定値：<span id="amagumo_settings_range_span">0.75</span><br>
             <span style="font-size: 0.9rem;">雨雲レーダーのz-index</span><br>
             <input type="number" style="width: 5rem;font-size: 0.9rem;" id="amagumo_settings_zindex" value="10" placeholder="10">
+            <hr>
+            <div id="liden_settings_error_latest" style="color: #ff003c;display: none;"  data-tippy-content="「更新」ボタンを押して最新の時刻に戻してください。">最新の時刻ではない場合<br>「<img src="source/liden-thunder.svg" style="width: 1em;">雷レーダー」は<br>使用できません。</div>
+            <input type="checkbox" id="liden_settings_checkbox" checked><label for="liden_settings_checkbox"><img src="source/liden-thunder.svg" style="width: 1em;">雷レーダーを表示</label>
+            <div id="liden_settings_period_box" data-tippy-content="「全期間」で雷レーダーが表示されない場合、「雷レーダーの再描画」をすると雷レーダーが表示されるようになります。">
+                <input type="radio" name="liden_settings_period" value="10m" id="liden_settings_period_10m" checked><label id="liden_settings_period_10m_label" for="liden_settings_period_10m"><span id="liden_settings_period_10m_span">10分間</span></label>
+                <input type="radio" name="liden_settings_period" value="all" id="liden_settings_period_all"><label id="liden_settings_period_all_label" for="liden_settings_period_all"><span id="liden_settings_period_all_span">全期間</span></label>
+            </div>
+            <span style="font-size: 0.9rem;"><img src="source/liden-thunder.svg" style="width: 1em;">雷レーダーの透過度</span><br>
+            <input type="range" id="liden_settings_opacity" min="0" max="1" step="0.01" value="1">
+            <br>設定値：<span id="liden_settings_opacity_span">1.00</span><br>
+            <span style="font-size: 0.9rem;"><img src="source/liden-thunder.svg" style="width: 1em;">雷レーダーのサイズ</span><br>
+            <input type="range" id="liden_settings_size" min="1" max="100" step="1" value="30">
+            <br>設定値：<span id="liden_settings_size_span">30px</span><br>
+            <span style="font-size: 0.9rem;"><img src="source/liden-thunder.svg" style="width: 1em;">雷レーダーのz-index</span><br>
+            <input type="number" style="width: 5rem;font-size: 0.9rem;" id="liden_settings_zindex" value="60" placeholder="60">
+            <div id="liden_settings_redraw" data-tippy-content="「全期間」で雷レーダーが表示されない場合にお試しください。">雷レーダーの再描画</div>
             <hr>
             <input type="checkbox" id="amagumo_settings_checkbox_title" checked><label for="amagumo_settings_checkbox_title">タイトルを表示</label><br>
             <input type="checkbox" id="amagumo_settings_checkbox_hanrei" checked><label for="amagumo_settings_checkbox_hanrei">凡例を表示</label>
@@ -300,8 +324,13 @@
                 <canvas id="tempChart"></canvas>
             </div>
         </div>
-        <div id="tempChartWait"><span>観測点のデータを読み込み中です…。<br>
-        (グラフが途切れている場合は、読み込み失敗ですのでもう一度観測点をおして再描画してください。)</span></div>
+        <div id="tempChartWait">
+            <span id="tempChartWaitClose">×</span>
+            <span>
+                観測点のデータを読み込み中です…。<br>
+                (グラフが途切れている場合は、読み込み失敗ですのでもう一度観測点をおして再描画してください。)
+        </span>
+        </div>
     </body>
     <link rel="stylesheet" href="amedas.css">
     <script src="amedas.js"></script>

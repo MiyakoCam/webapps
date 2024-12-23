@@ -361,6 +361,11 @@ function getColor_precipitation24h(d) {
                         '#00000000';
 }
 
+function getColor_mlitLine(d) {
+    return d > 0   ? '#000000' :
+                        '#00000000';
+}
+
 function getColor_snow1h(d) {
     return d >= 40 ? '#CC00FF' :
             d >= 30  ? '#FF0000' :
@@ -442,15 +447,21 @@ var map = L.map('map', {
     scrollWheelZoom: false,
     smoothWheelZoom: true,
     smoothSensitivity: 1.5,
-    preferCanvas:true,
+    preferCanvas:false,
 });
 //L.control.scale({maxWidth:150,position:'bottomright',imperial:false}).addTo(map);  // スケールを表示
 map.zoomControl.setPosition('topright');
 
+map.attributionControl.addAttribution(
+    "<a href='https://www.jma.go.jp/' target='_blank'>気象庁</a>"
+);
+
 map.createPane("pane_map").style.zIndex = 1;
 map.createPane("nowcast").style.zIndex = 10;
 map.createPane("pane_map_2").style.zIndex = 50;
+map.createPane("liden").style.zIndex = 60;
 map.createPane("important").style.zIndex = 70;
+map.createPane("mlit").style.zIndex = 90;
 map.createPane("amedas").style.zIndex = 100;
 var mapdata;
       let border; //市区町界
@@ -464,8 +475,7 @@ var mapdata;
                     "opacity": 1,
                     "fillColor": "#ffffff",
                     "fillOpacity": 1,
-                    },
-    attribution: "<a href='https://www.jma.go.jp/' target='_blank'>気象庁</a>"
+                    }
                 }).addTo(map);
                 let border_2; //市区町界        
                 border_2 = L.geoJson(mapdata,{
@@ -485,22 +495,33 @@ var mapdata;
 var PointList;
 var latestTime;
 var tempJson;
+var lidenJson = [];
+var mlitRainDataJson = "";
 var lowtempList = [];
 var hightempList = [];
 Cookies.remove('latesttemp');
+var autoReloadInterval;
+var autoreload_onoff;
+var autoreload_onoff_num;
 
 var amedas = L.layerGroup();
+var mlit = L.layerGroup();
+var liden = L.layerGroup();
 var nowcast = L.layerGroup();
 
 let params = new URL(window.location.href).searchParams;
 var consoletext = "自動更新は無効です。自動更新するにはURLに「?autoreload=on」を付け加えます。";
 if (params.get('autoreload') == "on") {
-    setInterval(() => {
+    document.getElementsByClassName('autoreload_setsumei')[0].classList.add('on');
+    autoreload_onoff = "on";
+    autoReloadInterval = setInterval(() => {
         TempInfo_get();
     }, 300000);
-    consoletext = "自動更新は有効です。";
+    consoletext = "自動更新は有効です。5分ごとに情報の更新が行われます。";
 }
 console.log(consoletext);
+
+PointList_get();
 
 async function PointList_get() {
     const url = "amedastable.json";
@@ -538,28 +559,96 @@ function TempInfo_get() {
         (async() => {
             const url = "https://www.jma.go.jp/bosai/amedas/data/map/"+latestTime+".json";
             const response = await fetch(url)
-                .then(response => response.json())
-                .then(response => {
-                    tempJson = response;
-                    mapDraw(param, true);
-                });
+            .then(response => response.json())
+            .then(response => {
+                tempJson = response;
+                let nowcastyear = nowcastDate.getFullYear();
+                let nowcastmonth = ('0' + (nowcastDate.getMonth() + 1)).slice(-2);
+                let nowcastday = ('0' + nowcastDate.getDate()).slice(-2);
+                let nowcasthour = ('0' + nowcastDate.getHours()).slice(-2);
+                let nowcastminute = ('0' + nowcastDate.getMinutes()).slice(-2);
+                let lidenTime = "" + nowcastyear + nowcastmonth + nowcastday + nowcasthour + nowcastminute + "00";
+                lidenJson = [];
+                if (document.getElementById('liden_settings_period_10m').checked == true) { // 10分間指定
+                    $.getJSON("https://www.jma.go.jp/bosai/jmatile/data/nowc/"+lidenTime+"/none/"+lidenTime+"/surf/liden/data.geojson", function(data){
+                        lidenJson.push(data);
+                        nowcastDate.setMinutes(nowcastDate.getMinutes() - 5);
+                        let nowcasthour2 = ('0' + nowcastDate.getHours()).slice(-2);
+                        let nowcastminute2 = ('0' + nowcastDate.getMinutes()).slice(-2);
+                        let lidenTime2 = "" + nowcastyear + nowcastmonth + nowcastday + nowcasthour2 + nowcastminute2 + "00";
+                        nowcastDate.setMinutes(nowcastDate.getMinutes() + 5);
+                        $.getJSON("https://www.jma.go.jp/bosai/jmatile/data/nowc/"+lidenTime2+"/none/"+lidenTime2+"/surf/liden/data.geojson", function(data){
+                            lidenJson.push(data);
+                            mlitRainData_get();
+                        });
+                    });
+                } else if (document.getElementById('liden_settings_period_all').checked == true) { // 全期間指定
+                    $.getJSON("https://www.jma.go.jp/bosai/jmatile/data/nowc/targetTimes_N3.json", function(data1) {
+                        var targetCount = 0;
+                        var foreachCount = 0;
+                        data1.forEach(element => {if (element["elements"].includes("liden") == true) {targetCount++;}});
+                        data1.forEach((element, index) => {
+                            if (element["elements"].includes("liden") == true) {
+                                let lidenTime3 = element["basetime"];
+                                $.getJSON("https://www.jma.go.jp/bosai/jmatile/data/nowc/"+lidenTime3+"/none/"+lidenTime3+"/surf/liden/data.geojson", function(data2){
+                                    lidenJson.push(data2);
+                                    foreachCount++;
+                                    if (foreachCount == targetCount) {
+                                        mlitRainData_get();
+                                    }
+                                });
+                                
+                            }
+                        });
+                    });
+                } else {;
+                    console.warn("雷レーダーの期間指定が不正な値だったため、雷レーダー情報は取得していません。情報を更新するまで雷レーダー機能は使用できません。");
+                }
+                
+            });
         })();
-    });   
+    });
 }
-PointList_get();
+
+var miltParam;
+function mlitRainData_get(isDraw) {
+    mlitRainDataJson = "";
+    if (param.indexOf('precipitation') !== -1) {
+        var mlitRain_date = new Date(nowcastDate.getTime());
+        mlitRain_date.setMinutes(mlitRain_date.getMinutes() - 10);
+        miltParam = param == "precipitation10m" ? "10m" :
+                        param == "precipitation1h" ? "1h" :
+                        param == "precipitation3h" ? "3h" :
+                        param == "precipitation24h" ? "24h" : "";
+        if (miltParam == "") {console.warn("国土交通省管轄雨量計データ取得用のパラムが不正な値だったため、国土交通省管轄雨量計データは取得していません。");}
+        var mlit_dateText = ""+mlitRain_date.getFullYear()+ ('0'+(mlitRain_date.getMonth()+1)).slice(-2) + ('0'+mlitRain_date.getDate()).slice(-2) + ('0'+mlitRain_date.getHours()).slice(-2) + ('0'+mlitRain_date.getMinutes()).slice(-2) + "00";
+        $.getJSON("https://www.jma.go.jp/bosai/jmatile/data/nowc/"+mlit_dateText+"/none/"+mlit_dateText+"/surf/rain"+miltParam+"/data.geojson", function(mlitData) {
+            mlitRainDataJson = mlitData;
+            if (isDraw != false && isDraw != "false") {
+                mapDraw(param, true);
+            }
+        });
+    } else {
+        if (isDraw != false && isDraw != "false") {
+            mapDraw(param, true);
+        }
+    }
+}
 
 var unit;
 var nowcast_basemap;
 
-
-function mapDraw(param_mapDraw, redrawNowcast) {
+function mapDraw(param_mapDraw, redrawNowcast, timeChange) {
     document.getElementById('title_text').innerText = getName(param_mapDraw);
     //if (amedas) {
         map.removeLayer(amedas);
         amedas = L.layerGroup();
-        
+        map.removeLayer(mlit);
+        mlit = L.layerGroup();
+        map.removeLayer(liden);
+        liden = L.layerGroup();
     //}
-    if (redrawNowcast != "") {
+    if (redrawNowcast != undefined) {
         map.removeLayer(nowcast);
         nowcast = L.layerGroup();
         let nowcastyear = nowcastDate.getFullYear();
@@ -567,12 +656,13 @@ function mapDraw(param_mapDraw, redrawNowcast) {
         let nowcastday = ('0' + nowcastDate.getDate()).slice(-2);
         let nowcasthour = ('0' + nowcastDate.getHours()).slice(-2);
         let nowcastminute = ('0' + nowcastDate.getMinutes()).slice(-2);
-        let nowcastGetTime = "" + nowcastyear + nowcastmonth + nowcastday + nowcasthour + nowcastminute + "00"
+        let nowcastGetTime = "" + nowcastyear +"-"+ nowcastmonth +"-"+ nowcastday +"-"+ nowcasthour +"-"+ nowcastminute;
 
-        let nowcast_url = "https://www.jma.go.jp/bosai/jmatile/data/nowc/"+nowcastGetTime+"/none/"+nowcastGetTime+"/surf/hrpns/{z}/{x}/{y}.png"
+        // let nowcast_url = "https://www.jma.go.jp/bosai/jmatile/data/nowc/"+nowcastGetTime+"/none/"+nowcastGetTime+"/surf/hrpns/{z}/{x}/{y}.png";
+        let nowcast_url = "https://tile.weathernews.jp/3/tile/rad_anl/"+nowcastyear+"/"+nowcastmonth+"/"+nowcastday+"/"+nowcastGetTime+"_Tiles_999999999999/{z}_{x}_{y}.png";
 
-        nowcast_basemap = L.tileLayer(nowcast_url, {opacity: 0.5,pane:"nowcast"})
-        if (document.getElementById('amagumo_settings_range_span').innerText != "0.50") {
+        nowcast_basemap = L.tileLayer(nowcast_url, {tileSize: 256,opacity: 0.75,pane:"nowcast",maxNativeZoom: 9,className: "nowcast_tile_img",attribution:'<a href="https://weathernews.jp/" target="_blank" rel="noopener noreferrer">ウェザーニュース</a>'});
+        if (document.getElementById('amagumo_settings_range_span').innerText != "0.75") {
             let opacity = document.getElementById('amagumo_settings_range_span').innerText;
             nowcast_basemap["options"]["opacity"] = opacity;
         }
@@ -646,11 +736,12 @@ function mapDraw(param_mapDraw, redrawNowcast) {
                     var amedas_latlng = new L.LatLng((element[1]["lat"][0] + element[1]["lat"][1]/60) , (element[1]["lon"][0] + element[1]["lon"][1]/60));
                     if (param_mapDraw != "wind") {
                         eval("circle"+element[0]+" = L.circle(amedas_latlng, {pane: \"amedas\", radius:6000, weight: 3,opacity:1,popupAnchor: [0,-50],fillColor: getColor_"+param_mapDraw+"(tempJson[element[0]][param_mapDraw][0]),fillOpacity:0.3,color:getColor_"+param_mapDraw+"(tempJson[element[0]][param_mapDraw][0])});");
+                        // eval("circle"+element[0]+" = L.ircleMarker(amedas_latlng, {pane: \"amedas\", radius:6, weight: 3,opacity:1,popupAnchor: [0,-50],fillColor: getColor_"+param_mapDraw+"(tempJson[element[0]][param_mapDraw][0]),fillOpacity:0.3,color:getColor_"+param_mapDraw+"(tempJson[element[0]][param_mapDraw][0])});");
                         eval("circle"+element[0]+".bindTooltip('<ruby>'+element[1]['kjName'] + '<rt>' + element[1]['knName'] + '</rt></ruby>　'+tempJson[element[0]][param_mapDraw][0]+unit,{direction: 'auto', permanent: false, sticky: false,});");
                     } else {
                         var icon = L.icon({iconUrl: 'source/wind'+getNum_wind(tempJson[element[0]][param_mapDraw][0])+'.png',iconSize: [30, 30], iconAnchor: [15, 15]});
                         eval("circle"+element[0]+" = L.marker(amedas_latlng, {pane: \"amedas\", icon: icon, rotationAngle: tempJson[element[0]]['windDirection'][0] * 22.5});");
-                        eval("circle"+element[0]+".bindTooltip('<ruby>'+element[1]['kjName'] + '<rt>' + element[1]['knName'] + '</rt></ruby> '+windDirection[tempJson[element[0]]['windDirection'][0]]+' '+tempJson[element[0]][param_mapDraw][0]+unit,{direction: 'auto', permanent: false, sticky: false,});");
+                        eval("circle"+element[0]+".bindTooltip('<ruby>'+element[1]['kjName'] + '<rt>' + element[1]['knName'] + '</rt></ruby>　'+windDirection[tempJson[element[0]]['windDirection'][0]]+' '+tempJson[element[0]][param_mapDraw][0]+unit,{direction: 'auto', permanent: false, sticky: false,});");
                     }
                     
                     eval("circle"+element[0]+".on('click', function(e) { createGraph("+element[0]+", e);})");
@@ -693,10 +784,73 @@ function mapDraw(param_mapDraw, redrawNowcast) {
     }
     
     if (param_mapDraw == "sun1h") {already = true;}
+
+    // 雷描画 2024/09/22追加
+    var iconSize_value = document.getElementById('liden_settings_size').value;
+    var iconOpacity_value = document.getElementById('liden_settings_opacity').value;
+    var lidenIconImage = L.icon({
+        iconUrl: 'source/liden-thunder.svg',
+        iconSize: [iconSize_value, iconSize_value],
+        iconAnchor: [iconSize_value/2, iconSize_value/2],
+        popupAnchor: [0, iconSize_value*-1]
+    });
+    for (let i = 0; i < lidenJson.length; i++) {
+        lidenJson[i]["features"].forEach(element => {
+            var latlng = new L.LatLng(element["geometry"]["coordinates"][1], element["geometry"]["coordinates"][0]);
+            if (element["properties"]["type"] == 4) {
+                var lidenMarker = L.marker(latlng, {icon: lidenIconImage, opacity: iconOpacity_value, pane: "liden"});
+                lidenMarker.bindTooltip("観測日時 : "+element["properties"]["obstimeJST"],{direction: 'auto', permanent: false, sticky: false,className: "lidenTooltip"})
+                liden.addLayer(lidenMarker);
+            }
+        });
+    }
+
+    // 国土交通省雨量計描画 2024/10/19追加
+    if (param_mapDraw.indexOf('precipitation') !== -1 && mlitRainDataJson != "") {
+    mlitRainDataJson["features"].forEach(element => {
+        var mlit_latlng = new L.LatLng(element["geometry"]["coordinates"][1], element["geometry"]["coordinates"][0]);
+        var circle;
+        eval("circle = L.circle(mlit_latlng, {pane: \"mlit\", radius:3000, weight: 1,opacity:0.6,popupAnchor: [0,-50],fillColor: getColor_"+param_mapDraw+"(element['properties']['rain'+miltParam]),fillOpacity:0.6,color:getColor_mlitLine(element['properties']['rain'+miltParam])});");
+        circle.bindTooltip(""+element["properties"]["rain"+miltParam]+unit,{direction: 'auto', permanent: false, sticky: false,});
+        mlit.addLayer(circle);
+    });
+    }
+    if (param_mapDraw.indexOf('precipitation') !== -1 && document.getElementById('amagumo_settings_checkbox_mlit').checked == true) {
+        map.addLayer(mlit);
+        map.attributionControl.removeAttribution("<a href='https://www.mlit.go.jp/' target='_blank'>国土交通庁</a>");
+        map.attributionControl.addAttribution("<a href='https://www.mlit.go.jp/' target='_blank'>国土交通庁</a>");
+    }
+    
+
+    if (timeChange != undefined) {
+        document.getElementById('liden_settings_checkbox').checked = false;
+        document.getElementById('liden_settings_checkbox').disabled = true;
+        document.getElementById('liden_settings_period_10m').disabled = true;
+        document.getElementById('liden_settings_period_all').disabled = true;
+        document.getElementById('liden_settings_opacity').disabled = true;
+        document.getElementById('liden_settings_size').disabled = true;
+        document.getElementById('liden_settings_zindex').disabled = true;
+        document.getElementById('liden_settings_error_latest').style.display = "block";
+    } else {
+        document.getElementById('liden_settings_checkbox').disabled = false;
+        document.getElementById('liden_settings_period_10m').disabled = false;
+        document.getElementById('liden_settings_period_all').disabled = false;
+        document.getElementById('liden_settings_opacity').disabled = false;
+        document.getElementById('liden_settings_size').disabled = false;
+        document.getElementById('liden_settings_zindex').disabled = false;
+        document.getElementById('liden_settings_error_latest').style.display = "none";
+        if (param_mapDraw.indexOf('precipitation') !== -1) {
+            map.addLayer(liden);
+            document.getElementById('liden_settings_checkbox').checked = true;
+        } else {
+            document.getElementById('liden_settings_checkbox').checked = false;
+        }
+    }
 }
 
 
-
+// URLのGETパラメータから現在のモードを取得する関数
+// 現在は不使用
 function getParam(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[\[\]]/g, "\\$&");
@@ -713,6 +867,8 @@ function modeChange(e) {
     param = mode;
     if (param == "snow" || param == "snow1h" || param == "snow6h" || param == "snow12h" || param == "snow24h") {
         TempInfo_get();
+    } else if (param.indexOf('precipitation') !== -1) {
+        mlitRainData_get();
     } else {
         mapDraw(mode);
     }
@@ -1245,6 +1401,9 @@ function createGraph(stationID, e) {
 document.getElementById('tempChartBackClose').addEventListener("click",()=>{
     document.getElementById('tempChartBack').classList.remove("display");
 });
+document.getElementById('tempChartWaitClose').addEventListener("click",()=>{
+    document.getElementById('tempChartWait').classList.remove("display");
+});
 
 function timeBefore(time) {
     if (time == "1d") {
@@ -1278,7 +1437,7 @@ function timeBefore(time) {
                 .then(response => response.json())
                 .then(response => {
                     tempJson = response;
-                    mapDraw(param, true);
+                    mapDraw(param, true, true);
                 });
         })();
     //}
@@ -1315,7 +1474,7 @@ function timeAfter(time) {
                 .then(response => response.json())
                 .then(response => {
                     tempJson = response;
-                    mapDraw(param, true);
+                    mapDraw(param, true, true);
                 });
         })();
     //}
@@ -1388,6 +1547,19 @@ document.getElementById('amagumo_settings_close').addEventListener("click",()=>{
 document.getElementById('amagumo_settings_checkbox_amedas').addEventListener("change",()=>{
     if (document.getElementById('amagumo_settings_checkbox_amedas').checked) {map.addLayer(amedas);} else {map.removeLayer(amedas);}
 });
+document.getElementById('amagumo_settings_checkbox_mlit').addEventListener("change",()=>{
+    map.attributionControl.removeAttribution("<a href='https://www.mlit.go.jp/' target='_blank'>国土交通庁</a>");
+    if (document.getElementById('amagumo_settings_checkbox_mlit').checked) {
+        map.addLayer(mlit);
+        map.attributionControl.addAttribution("<a href='https://www.mlit.go.jp/' target='_blank'>国土交通庁</a>");
+    } else {
+        map.removeLayer(mlit);
+    }
+});
+document.getElementById('mlit_settings_zindex').addEventListener("input",()=>{
+    let zindex = document.getElementById('mlit_settings_zindex').value;
+    document.getElementsByClassName('leaflet-mlit-pane')[0].style.zIndex = zindex;
+});
 document.getElementById('amagumo_settings_checkbox').addEventListener("change",()=>{
     if (document.getElementById('amagumo_settings_checkbox').checked) {map.addLayer(nowcast);} else {map.removeLayer(nowcast);}
 });
@@ -1407,6 +1579,45 @@ document.getElementById('amagumo_settings_zindex').addEventListener("input",()=>
     let zindex = document.getElementById('amagumo_settings_zindex').value;
     document.getElementsByClassName('leaflet-nowcast-pane')[0].style.zIndex = zindex;
 });
+
+//雷設定 20240922追加
+document.getElementById('liden_settings_checkbox').addEventListener("change",()=>{
+    if (document.getElementById('liden_settings_checkbox').checked) {map.addLayer(liden);} else {map.removeLayer(liden);}
+});
+document.getElementById('liden_settings_opacity').addEventListener("input",()=>{
+    let opacity = Number(document.getElementById('liden_settings_opacity').value).toFixed(2);
+    document.getElementById('liden_settings_opacity_span').innerText = opacity;
+});
+document.getElementById('liden_settings_opacity').addEventListener("change",()=>{
+    let opacity = Number(document.getElementById('liden_settings_opacity').value);
+    Object.keys(liden["_layers"]).forEach(key => {
+        liden["_layers"][key]["options"]["opacity"] = opacity;
+    });
+    if (document.getElementById('liden_settings_checkbox').checked) {
+        map.removeLayer(liden);
+        map.addLayer(liden);
+    }
+});
+document.getElementById('liden_settings_size').addEventListener("input",()=>{
+    let size = Number(document.getElementById('liden_settings_size').value).toFixed(0);
+    document.getElementById('liden_settings_size_span').innerText = size + " px";
+});
+document.getElementById('liden_settings_size').addEventListener("change",()=>{
+    let size = Number(document.getElementById('liden_settings_size').value);
+    Object.keys(liden["_layers"]).forEach(key => {
+        liden["_layers"][key]["options"]["icon"]["options"]["iconSize"] = [size, size];
+        liden["_layers"][key]["options"]["icon"]["options"]["iconAnchor"] = [size/2, size/2];
+    });
+    if (document.getElementById('liden_settings_checkbox').checked) {
+        map.removeLayer(liden);
+        map.addLayer(liden);
+    }
+});
+document.getElementById('liden_settings_zindex').addEventListener("input",()=>{
+    let zindex = document.getElementById('liden_settings_zindex').value;
+    document.getElementsByClassName('leaflet-liden-pane')[0].style.zIndex = zindex;
+});
+
 document.getElementById('amagumo_settings_checkbox_title').addEventListener("click",()=>{
     if (document.getElementById('title').classList.contains('display')) {
         document.getElementById('title').classList.remove('display');
@@ -1421,6 +1632,58 @@ document.getElementById('amagumo_settings_checkbox_hanrei').addEventListener("cl
         document.getElementsByClassName('hanrei')[0].classList.add('display');
     }
 });
+
+document.getElementById('liden_settings_period_10m').addEventListener("change",()=>{
+    TempInfo_get();
+});
+document.getElementById('liden_settings_period_all').addEventListener("change",()=>{
+    TempInfo_get();
+});
+document.getElementById('liden_settings_redraw').addEventListener("click",()=>{
+    mapDraw(param);
+});
+
+document.getElementById('autoreload').addEventListener("click",()=>{
+    if (autoreload_onoff == "on") {
+        document.getElementsByClassName('autoreload_setsumei')[0].classList.remove('on');
+        autoreload_onoff = "off";
+    } else {
+        document.getElementsByClassName('autoreload_setsumei')[0].classList.add('on');
+        autoreload_onoff = "on";
+    }
+    if (document.getElementById('autoreload_num').value < 5) {
+        autoreload_onoff_num = 5;
+        document.getElementById('autoreload_num').value = 5;
+    } else {
+        autoreload_onoff_num = document.getElementById('autoreload_num').value;
+    }
+    interval();
+});
+document.getElementById('autoreload_num').addEventListener("change",()=>{
+    if (document.getElementById('autoreload_num').value < 5) {
+        autoreload_onoff_num = 5;
+        document.getElementById('autoreload_num').value = 5;
+    } else {
+        autoreload_onoff_num = document.getElementById('autoreload_num').value;
+    }
+    interval();
+});
+
+function interval() {
+    autoreload_onoff_num = autoreload_onoff_num * 60 * 1000;
+    if (autoreload_onoff == "on") {
+        if (autoReloadInterval != null || autoReloadInterval != 0) {
+            clearInterval(autoReloadInterval);
+            autoReloadInterval = null;
+        }
+        autoReloadInterval = setInterval(() => {
+            TempInfo_get();
+        }, autoreload_onoff_num);
+    } else {
+        clearInterval(autoReloadInterval);
+        autoReloadInterval = null;
+    }
+}
 
 function getTodayData(stationID, year, month, date, hour, minute) {
     
@@ -1595,3 +1858,11 @@ function getYesterdayData(stationID, year, month, date) {
         });
     });
     }
+
+// 地図外ツールチップ
+tippy('[data-tippy-content]', {
+    placement: 'top',
+    animation: 'perspective',
+    duration: 200,
+    allowHTML: true,
+});

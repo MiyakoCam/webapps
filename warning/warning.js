@@ -210,8 +210,10 @@ var autoScroll_onoff = "off";
 var autoReload_onoff = "off";
 var autoReloadInterval;
 var lightMode_onoff = "off";
+var overview_onoff = "on";
 
 var isAll_text = "";
+
 
 function getData() {
     $.getJSON("https://www.jma.go.jp/bosai/warning/data/warning/map.json",function(data) {
@@ -308,6 +310,8 @@ function mapDraw() {
                 style = {"color": "#333533","weight": 0.5,"opacity": 1,"fillColor": "#dd0000","fillOpacity": 1,}
             } else if (prefFilledMaxList[PRFkey] == 3) {
                 style = {"color": "#333533","weight": 0.5,"opacity": 1,"fillColor": "#aa00dd","fillOpacity": 1,}
+            } else if (prefFilledMaxList[PRFkey] == 4) {
+                style = {"color": "#333533","weight": 0.5,"opacity": 1,"fillColor": "#000000","fillOpacity": 1,}
             } else {
                 style = {"weight": 0,"opacity": 0,"fillOpacity": 0,}
             }
@@ -329,6 +333,8 @@ function mapDraw() {
                 style = {"color": "#333533","weight": 0.5,"opacity": 1,"fillColor": "#dd0000","fillOpacity": 1,}
             } else if (filledMaxList[FMLi] == 3) {
                 style = {"color": "#333533","weight": 0.5,"opacity": 1,"fillColor": "#aa00dd","fillOpacity": 1,}
+            } else if (filledMaxList[FMLi] == 4) {
+                style = {"color": "#333533","weight": 0.5,"opacity": 1,"fillColor": "#000000","fillOpacity": 1,}
             } else {
                 style = {"weight": 0,"opacity": 0,"fillOpacity": 0,}
             }
@@ -352,6 +358,7 @@ function createDetail(pref, prefName, isAll) {
     }
 
     var text1 = '<tr><td class="cityName">'+prefName+'</td><td class="cityName">発表警報・注意報</td></tr>';
+    var textTr_level4 = "";
     var textTr_level3 = "";
     var textTr_level2 = "";
     var textTr_level1 = "";
@@ -360,11 +367,14 @@ function createDetail(pref, prefName, isAll) {
         if (filledList[element]) {
             var text_allKari = "";
             var array_Num = cityCode.indexOf(element);
+            var textSpan_level4 = "";
             var textSpan_level3 = "";
             var textSpan_level2 = "";
             var textSpan_level1 = "";
             Object.keys(filledList[element]).forEach(element2 => {
-                if (warningLevel[element2] == 3) {
+                if (warningLevel[element2] == 4) {
+                    textSpan_level4 += '<span class="color'+filledList[element][element2]+'">'+warningShortName[element2]+'</span>';
+                } else if (warningLevel[element2] == 3) {
                     textSpan_level3 += '<span class="color'+filledList[element][element2]+'">'+warningShortName[element2]+'</span>';
                 } else if (warningLevel[element2] == 2) {
                     textSpan_level2 += '<span class="color'+filledList[element][element2]+'">'+warningShortName[element2]+'</span>';
@@ -374,9 +384,11 @@ function createDetail(pref, prefName, isAll) {
             });
             text_allKari += '<tr><td><ruby>'+cityName[array_Num]+'<rt>'+cityNameKana[array_Num]+'</rt></ruby></td>';
             text_allKari += '<td>';
-            text_allKari += textSpan_level3 + textSpan_level2 + textSpan_level1;
+            text_allKari += textSpan_level4 + textSpan_level3 + textSpan_level2 + textSpan_level1;
             text_allKari += '</td>';
-            if (filledMaxList[element] == 3) {
+            if (filledMaxList[element] == 4) {
+                textTr_level4 += text_allKari;
+            } else if (filledMaxList[element] == 3) {
                 textTr_level3 += text_allKari;
             } else if (filledMaxList[element] == 2) {
                 textTr_level2 += text_allKari;
@@ -386,18 +398,18 @@ function createDetail(pref, prefName, isAll) {
         }
     });
     
-    text1 += textTr_level3 + textTr_level2 + textTr_level1;
+    text1 += textTr_level4 + textTr_level3 + textTr_level2 + textTr_level1;
 
     if (isAll != undefined) {
         latestClickPref = "";
         $('#text_yososhindo').addClass("ichiranAll");
 
         if (isAll == 0) { // 最初
-            if (textTr_level3 != "" || textTr_level2 != "" || textTr_level1 != "") {
+            if (textTr_level4 != "" || textTr_level3 != "" || textTr_level2 != "" || textTr_level1 != "") {
                 isAll_text += text1;
             }
         } else if (isAll == 63) { // 最後
-            if (textTr_level3 != "" || textTr_level2 != "" || textTr_level1 != "") {
+            if (textTr_level4 != "" || textTr_level3 != "" || textTr_level2 != "" || textTr_level1 != "") {
                 if (isAll_text != "") {
                     isAll_text += ('<tr><td colspan="2" style="height: 2rem;opacity: 0;"></td></tr>'+text1);
                 } else {
@@ -407,7 +419,7 @@ function createDetail(pref, prefName, isAll) {
             document.getElementById('table_text_yososhindo').innerHTML = isAll_text;
             isAll_text = "";
         } else { // 途中
-            if (textTr_level3 != "" || textTr_level2 != "" || textTr_level1 != "") {
+            if (textTr_level4 != "" || textTr_level3 != "" || textTr_level2 != "" || textTr_level1 != "") {
                 if (isAll_text != "") {
                     isAll_text += ('<tr><td colspan="2" style="height: 2rem;opacity: 0;"></td></tr>'+text1);
                 } else {
@@ -419,7 +431,7 @@ function createDetail(pref, prefName, isAll) {
         latestClickPref = pref;
         $('#text_yososhindo').removeClass("ichiranAll");
 
-        if (textTr_level3 == "" && textTr_level2 == "" && textTr_level1 == "") {
+        if (textTr_level4 == "" && textTr_level3 == "" && textTr_level2 == "" && textTr_level1 == "") {
             text1 += '<tr><td colspan="2" class="nowarning">現在発表されている警報・注意報はありません。</td></tr>';
         }
         document.getElementById('table_text_yososhindo').innerHTML = text1;
@@ -435,34 +447,40 @@ function createDetail(pref, prefName, isAll) {
 }
 
 function createOverview(pref, prefName) {
-    var level3 = [];
-    var level2 = [];
-    var level1 = [];
-    prefToCity[pref].forEach(element => {
-        if (filledList[element]) {
-            Object.keys(filledList[element]).forEach(element2 => {
-                if (warningLevel[element2] == 3) {
-                    if (level3.indexOf(element2) == -1) {level3.push(element2);}
-                } else if (warningLevel[element2] == 2) {
-                    if (level2.indexOf(element2) == -1) {level2.push(element2);}
-                } else if (warningLevel[element2] == 1) {
-                    if (level1.indexOf(element2) == -1) {level1.push(element2);}
-                }
-            });
-            
+    if (overview_onoff == "on") {
+        var level4 = [];
+        var level3 = [];
+        var level2 = [];
+        var level1 = [];
+        prefToCity[pref].forEach(element => {
+            if (filledList[element]) {
+                Object.keys(filledList[element]).forEach(element2 => {
+                    if (warningLevel[element2] == 4) {
+                        if (!level4.includes(element2)) {level4.push(element2);}
+                    } else if (warningLevel[element2] == 3) {
+                        if (!level3.includes(element2)) {level3.push(element2);}
+                    } else if (warningLevel[element2] == 2) {
+                        if (!level2.includes(element2)) {level2.push(element2);}
+                    } else if (warningLevel[element2] == 1) {
+                        if (!level1.includes(element2)) {level1.push(element2);}
+                    }
+                });
+            }
+        });
+        var level4_text = "";
+        var level3_text = "";
+        var level2_text = "";
+        var level1_text = "";
+        level4.forEach(L => {level4_text += '<span class="color4">'+warningShortName[L]+'</span>';});
+        level3.forEach(L => {level3_text += '<span class="color3">'+warningShortName[L]+'</span>';});
+        level2.forEach(L => {level2_text += '<span class="color2">'+warningShortName[L]+'</span>';});
+        level1.forEach(L => {level1_text += '<span class="color1">'+warningShortName[L]+'</span>';});
+        if (level4_text === "" && level3_text === "" && level2_text === "" && level1_text === "") {
+            level4_text = "発表されている警報・注意報はありません。";
         }
-    });
-    var level3_text = "";
-    var level2_text = "";
-    var level1_text = "";
-    level3.forEach(L => {level3_text += '<span class="color3">'+warningShortName[L]+'</span>';});
-    level2.forEach(L => {level2_text += '<span class="color2">'+warningShortName[L]+'</span>';});
-    level1.forEach(L => {level1_text += '<span class="color1">'+warningShortName[L]+'</span>';});
-    if (level3_text == "" && level2_text == "" && level1_text == "") {
-        level3_text = "発表されている警報・注意報はありません。";
+        document.getElementById('overview').innerHTML = '<div style="line-height: 1.4em;font-size: 1.1em;">'+prefName+'</div>'+level4_text+level3_text+level2_text+level1_text;
+        document.getElementById('overview').classList.add("display");
     }
-    document.getElementById('overview').innerHTML = '<div style="line-height: 1.4em;font-size: 1.1em;">'+prefName+'</div>'+level3_text+level2_text+level1_text;
-    document.getElementById('overview').classList.add("display");
 }
 function deleteOverview(pref, e) {
     //document.getElementById('overview').innerHTML = "";
@@ -532,6 +550,17 @@ document.getElementById('ichiranAll').addEventListener("click",()=>{
     }
 });
 
+const overviewBtn = document.getElementById('overviewBtn');
+overviewBtn.addEventListener('click', () => {
+    if (overview_onoff == 'on') {
+        overviewBtn.classList.remove('on');
+        overview_onoff = 'off';
+    } else {
+        overviewBtn.classList.add('on');
+        overview_onoff = 'on';
+    }
+});
+
 $('#lightMode').click(event => {
     if (lightMode_onoff == "off") {
         lightMode_onoff = "on";
@@ -568,7 +597,7 @@ document.getElementById('btn_scroll_text_yososhindo').addEventListener("click", 
             
             if (scrollY > (tbody.scrollHeight-table.clientHeight+20)) {
                 scrollY = 0;
-                document.getElementById('btn_scroll_text_yososhindo').click();
+                table.scrollTop = scrollY;
             }
         }, 20);
     } else {
