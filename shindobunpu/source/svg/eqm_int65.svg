@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="500"
+   height="500"
+   viewBox="0 0 132.29166 132.29167"
+   version="1.1"
+   id="svg944"
+   inkscape:version="1.0.2-2 (e86c870879, 2021-01-15)"
+   sodipodi:docname="eqm_int65.svg">
+  <defs
+     id="defs938">
+    <rect
+       x="2.3711392"
+       y="1.8969114"
+       width="274.34081"
+       height="215.29944"
+       id="rect1515" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35442979"
+     inkscape:cx="769.81662"
+     inkscape:cy="261.07808"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1536"
+     inkscape:window-height="801"
+     inkscape:window-x="1358"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata941">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="レイヤー 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <circle
+       style="fill:#a00000;stroke:none;stroke-width:13.229;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:100;stroke-dasharray:none;paint-order:fill markers stroke;fill-opacity:1"
+       id="path1509"
+       cx="66.145836"
+       cy="66.145836"
+       r="66.145836" />
+    <g
+       aria-label="6+"
+       transform="translate(2.9225496,10.59834)"
+       id="text1513"
+       style="font-style:normal;font-weight:normal;font-size:132.292px;line-height:1;font-family:sans-serif;letter-spacing:-1.5875px;white-space:pre;shape-inside:url(#rect1515);fill:#fffffe;fill-opacity:1;stroke:none">
+      <path
+         d="m 66.385439,7.3225237 -1.421105,15.4383743 -3.552764,0.0646 q -22.156328,1.162723 -31.974875,24.417178 8.074463,-7.945272 18.926542,-7.68689 7.622293,0.129192 12.854546,4.263317 5.296848,4.134125 7.751484,11.304249 2.454637,7.170123 1.744085,15.825948 -0.775149,9.237186 -5.555231,16.924075 -4.715487,7.622293 -12.402376,11.88561 -7.686889,4.19872 -16.601097,4.00493 Q 26.917462,103.50553 20.264105,98.596257 13.675342,93.622388 10.639344,85.031159 7.603346,76.43993 8.6368773,66.298404 L 9.3474301,60.48479 Q 12.383428,36.196805 27.111249,21.791962 41.903666,7.3225237 63.930802,7.3225237 Z M 42.162049,54.412794 q -4.715486,-0.129191 -8.462037,2.325445 -3.746551,2.454637 -6.201188,6.265784 l -0.839745,5.813614 q -0.322978,2.906806 -0.258382,6.330379 0.129191,6.071996 2.777615,9.753952 2.648424,3.681955 7.493102,3.746551 4.780082,0.193787 8.72042,-3.100594 3.940339,-3.294381 5.813614,-8.849612 1.873276,-5.555231 1.227318,-11.304249 -0.581361,-5.038465 -3.294381,-7.945272 -2.648424,-2.971402 -6.976336,-3.035998 z"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:132.292px;font-family:Roboto;-inkscape-font-specification:'Roboto Bold Italic';fill:#fffffe;fill-opacity:1"
+         id="path839" />
+      <path
+         d="m 109.10274,63.449848 h 16.73024 l -2.19883,12.475978 h -16.68244 l -3.39385,19.502678 H 90.69948 L 94.093329,75.925826 H 77.267488 L 79.46632,63.449848 h 16.778039 l 3.250447,-18.690067 h 12.858384 z"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:97.8958px;font-family:Roboto;-inkscape-font-specification:'Roboto Bold Italic';fill:#fffffe;fill-opacity:1"
+         id="path841" />
+    </g>
+  </g>
+</svg>
