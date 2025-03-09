@@ -183,7 +183,19 @@ input[type="number"] {
 #text_yososhindo.display {display: block;}
 #close_text_yososhindo, #close_mikata_text_yososhindo {position: absolute;font-size: 1.3rem;color: white;top: 0px;right: 0px;cursor: pointer;padding: 5px;}
 #text_yososhindo_autoreload_onoff {position: absolute;font-size: 0.7rem;color: white;bottom: 0px;left: 0px;cursor: auto;padding: 3px;}
-#btn_scroll_text_yososhindo {font-weight: 500;font-family: "ヒラギノ角ゴ-Pro",'Noto Sans JP';position: absolute;font-size: 0.8rem;color: white;bottom: 3px;right: 3px;background-color: #00000088;border: white 2px solid;border-radius: 5px;padding: 3px;cursor: pointer;}
+.scrollParent {position: absolute;bottom: 3px;right: 3px;display: flex;flex-direction: column;gap: 3px;color: white;font-size: 0.7rem;}
+#btn_scroll_text_yososhindo {font-weight: 500;font-family: "ヒラギノ角ゴ-Pro",'Noto Sans JP';font-size: 0.8rem;color: white;background-color: #00000088;border: white 2px solid;border-radius: 5px;padding: 3px;cursor: pointer;}
+#btn_scroll_text_yososhindo.on {background-color: #ffffff;color: #000000;}
+#scroll_num {
+    background: #00000000;
+    border: 0;
+    width: 2rem;
+    font-family: "ヒラギノ角ゴ-Pro",'Noto Sans JP';
+    font-weight: 500;
+    border-bottom: #ffffff 1px solid;
+    font-size: 0.7rem;
+    color: white;
+}
 #text_yososhindo div.mihon {width: 90%;margin: auto;font-size: 1.5rem;text-align: center;}
 #text_yososhindo div.mihon div {width: calc(33% - 16px);margin: 10px 3px;display: inline-block;padding: 5px;outline: #ffffff 2px solid;}
 #text_yososhindo table {

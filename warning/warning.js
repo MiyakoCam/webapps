@@ -96,6 +96,19 @@ L.Map.SmoothWheelZoom = L.Handler.extend({
 
 });
 
+const mapLF = localforage.createInstance({
+    driver   : localforage.INDEXEDDB,
+    name     : 'webappData',
+    storeName: 'map',
+    version  : 1
+});
+const warningLF = localforage.createInstance({
+    driver   : localforage.INDEXEDDB,
+    name     : 'webappData',
+    storeName: 'warning',
+    version  : 1
+});
+
 L.Map.addInitHook('addHandler', 'smoothWheelZoom', L.Map.SmoothWheelZoom );
 
 var map = L.map('map', {
@@ -131,74 +144,6 @@ var map_cities2;
 var mapData_cities;
 var map_pref;
 var mapData_pref;
-$.getJSON("https://miyakocam.github.io/geojsons/warningPref.geojson",function(data) {
-    mapData_pref = data;
-    map_pref = L.geoJson(data,{
-        pane: "pane_map_1",
-        style: {
-        "opacity": 0,
-        "fillColor": "#ffffff",
-        "fillOpacity": 1,
-        }
-    }).addTo(map);
-    
-    data["features"].forEach(element => {
-        var map_pref2 = L.geoJson(element,{
-            pane: "pane_map_3",
-            style: {
-            "color": "#333533",
-            "weight": 1,
-            "opacity": 1,
-            "fillOpacity": 0,
-            }
-        });
-        map_pref2.prefName = element["properties"]["name"];
-        map_pref2.on('mouseover', function(e) {createOverview(element["properties"]["code"], element["properties"]["name"])});
-        map_pref2.on('mouseout', function(e) {deleteOverview(element["properties"]["code"], element["properties"]["name"])});
-        map_pref2.on('click', function(e) { createDetail(element["properties"]["code"], element["properties"]["name"])}).addTo(map);
-    })
-
-    // var list = [];
-    // data["features"].forEach(element => {
-    //     list.push(element["properties"]["code"]);
-    // })
-    // console.log(list)
-    
-});
-// $.getJSON("https://miyakocam.github.io/geojsons/warningSaibun.geojson",function(data) {
-//     
-//     map_pref2 = L.geoJson(data,{
-//         pane: "pane_map_3",
-//         style: {
-//         "color": "#333533",
-//         "weight": 0.7,
-//         "opacity": 1,
-//         "fillOpacity": 0,
-//         }
-//     }).addTo(map);
-// });
-$.getJSON("https://miyakocam.github.io/geojsons/warningCities.geojson",function(data) {
-    mapData_cities = data;
-    // map_cities = L.geoJson(data,{
-    //     pane: "pane_map_2",
-    //     style: {
-    //     "opacity": 0,
-    //     "fillColor": "#ffffff",
-    //     "fillOpacity": 1,
-    //     }
-    // }).addTo(map);
-    map_cities2 = L.geoJson(data,{
-        pane: "pane_map_2",
-            style: {
-            "color": "#333533",
-            "weight": 0.5,
-            "opacity": 1,
-            "fillOpacity": 0,
-            }
-    }).addTo(map);
-
-    getData();
-});
 
 var JSONdata;
 var filledList = {};
@@ -214,6 +159,86 @@ var overview_onoff = "on";
 
 var isAll_text = "";
 
+// メイン処理の呼び出し
+(async () => {
+    await Promise.all([
+        warningPrefGet(),
+        warningCitiesGet()
+    ]);
+    await getData();
+    loadFont();
+})();
+
+async function warningPrefGet() {
+    await mapLF.getItem("warningPref").then(async function(value) {
+        if (value !== null) {
+            // キーが存在し、値が取得できた場合
+            // ストレージからデータを取得し新しく取得しない
+            mapData_pref = value;
+            console.log("Map Loading completed: 'warningPref', IndexedDB");
+        } else {
+            // キーが存在しない場合
+            // 新しくデータを取得
+            const response = await fetch("https://miyakocam.github.io/geojsons/warningPref.geojson");
+            const data = await response.json();
+            mapData_pref = data;
+            console.log("Map Loading completed: 'warningPref', Network");
+            await mapLF.setItem("warningPref", mapData_pref);
+            console.log("Map Saved successfully: 'warningPref', IndexedDB");
+        }
+        map_pref = L.geoJson(mapData_pref,{
+            pane: "pane_map_1",
+            style: {
+            "opacity": 0,
+            "fillColor": "#ffffff",
+            "fillOpacity": 1,
+            }
+        }).addTo(map);
+    });
+    await mapData_pref["features"].forEach(element => {
+        var map_pref2 = L.geoJson(element,{
+            pane: "pane_map_3",
+            style: {
+            "color": "#333533",
+            "weight": 1,
+            "opacity": 1,
+            "fillOpacity": 0,
+            }
+        }).addTo(map);
+        map_pref2.prefName = element["properties"]["name"];
+        map_pref2.on('mouseover', function(e) {createOverview(element["properties"]["code"], element["properties"]["name"])});
+        map_pref2.on('mouseout', function(e) {deleteOverview(element["properties"]["code"], element["properties"]["name"])});
+        map_pref2.on('click', function(e) { createDetail(element["properties"]["code"], element["properties"]["name"])}).addTo(map);
+    })
+}
+async function warningCitiesGet() {
+    await mapLF.getItem("warningCities").then(async function(value) {
+        if (value !== null) {
+            // キーが存在し、値が取得できた場合
+            // ストレージからデータを取得し新しく取得しない
+            mapData_cities = value;
+            console.log("Map Loading completed: 'warningCities', IndexedDB");
+        } else {
+            // キーが存在しない場合
+            // 新しくデータを取得
+            const response = await fetch("https://miyakocam.github.io/geojsons/warningCities.geojson");
+            const data = await response.json();
+            mapData_cities = data;
+            console.log("Map Loading completed: 'warningCities', Network");
+            await mapLF.setItem("warningCities", mapData_cities);
+            console.log("Map Saved successfully: 'warningCities', IndexedDB");
+        }
+        map_cities2 = L.geoJson(mapData_cities,{
+            pane: "pane_map_2",
+            style: {
+            "color": "#333533",
+            "weight": 0.5,
+            "opacity": 1,
+            "fillOpacity": 0,
+            }
+        }).addTo(map);
+    });
+}
 
 function getData() {
     $.getJSON("https://www.jma.go.jp/bosai/warning/data/warning/map.json",function(data) {
@@ -447,6 +472,8 @@ function createDetail(pref, prefName, isAll) {
 }
 
 function createOverview(pref, prefName) {
+    console.log(pref, prefName);
+    
     if (overview_onoff == "on") {
         var level4 = [];
         var level3 = [];
@@ -578,22 +605,28 @@ document.getElementById('close_text_yososhindo').addEventListener("click",()=>{
     document.getElementById('text_yososhindo').classList.remove("display");
     scrollY = 0;
     clearInterval(scrollInterval);
-    document.getElementById('btn_scroll_text_yososhindo').innerText = "ｽｸﾛｰﾙ開始";
+    document.getElementById('btn_scroll_text_yososhindo').classList.remove('on');
     latestClickPref = "";
 });
 
 var scrollInterval;
 var scrollY = 0;
+var scrollSpeed = 1;
 document.getElementById('btn_scroll_text_yososhindo').addEventListener("click", ()=>{
     var table = document.querySelector('#table_text_yososhindo');
     var tbody = document.querySelector('#table_text_yososhindo tbody');
-    if (document.getElementById('btn_scroll_text_yososhindo').innerText == "ｽｸﾛｰﾙ開始") {
-        document.getElementById('btn_scroll_text_yososhindo').innerText = "ｽｸﾛｰﾙ停止";
+    if (document.getElementById('btn_scroll_text_yososhindo').classList.contains('on') == false) {
+        if (!document.getElementById('scroll_num').value || document.getElementById('scroll_num').value < 0.1) {
+            document.getElementById('scroll_num').value = 1;
+            console.log("スクロール速度が不正な値に設定されたため、1に初期化しました。");
+        }
+        scrollSpeed = Number(document.getElementById('scroll_num').value);
+        document.getElementById('btn_scroll_text_yososhindo').classList.add('on');
         autoScroll_onoff = "on";
         scrollY = table.scrollTop;
         scrollInterval = setInterval(() => {
-            table.scrollTop = scrollY + 1;
-            scrollY += 1;
+            table.scrollTop = scrollY + Number(scrollSpeed);
+            scrollY += Number(scrollSpeed);
             
             if (scrollY > (tbody.scrollHeight-table.clientHeight+20)) {
                 scrollY = 0;
@@ -602,7 +635,7 @@ document.getElementById('btn_scroll_text_yososhindo').addEventListener("click", 
         }, 20);
     } else {
         clearInterval(scrollInterval);
-        document.getElementById('btn_scroll_text_yososhindo').innerText = "ｽｸﾛｰﾙ開始";
+        document.getElementById('btn_scroll_text_yososhindo').classList.remove('on');
         autoScroll_onoff = "off";
     }
 });

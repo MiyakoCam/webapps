@@ -23,7 +23,7 @@
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-        <link rel="stylesheet" href="../../static/font/fonts.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-9SL593EYR6"></script>
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/leaflet-rotatedmarker"></script>
@@ -65,7 +65,10 @@
 
         <div id="text_yososhindo">
             <span id="close_text_yososhindo">×</span>
-            <button id="btn_scroll_text_yososhindo">ｽｸﾛｰﾙ開始</button>
+            <div class="scrollParent">
+                <span>S:<input type="number" id="scroll_num" value="1" step="0.1" min="0.1" max="10" title="スクロール速度を設定します。値×50px/s でスクロールします。"></span>
+                <button id="btn_scroll_text_yososhindo">ｽｸﾛｰﾙ</button>
+            </div>
             <span id="text_yososhindo_autoreload_onoff" title="自動更新">AR:×</span>
             <div class="mihon">
                 <div style="background-color: #aa00dd;color: #ffffff;">特別警報</div><div style="background-color: #dd0000;color: #ffffff;">警報</div><div style="background-color: #ffd000;color: #000000;">注意報</div>
@@ -80,6 +83,7 @@
 
     </body>
     <link rel="stylesheet" href="warning.css">
+    <script src="../../static/font/fonts.js"></script>
     <script src="citycode.js"></script>
     <script src="warning.js"></script>
 </html>
